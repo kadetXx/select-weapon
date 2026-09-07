@@ -5,6 +5,7 @@
 const SMG_MODEL = "/models/smg.glb";
 const LMG_MODEL = "/models/lmg.glb";
 const SHOTGUN_MODEL = "/models/shotgun.glb";
+const LAUNCHER_MODEL = "/models/launcher.glb";
 const SLOT_COUNT = 4;
 
 // Each enabled category has exactly one real weapon today. It's repeated
@@ -59,13 +60,26 @@ export const categories = [
       roundsPerMag: 75,
       operatorMod: "Oppressor",
       model: LMG_MODEL,
+      // This model's bounding box fits a bit looser than the others (longer
+      // stock/bipod silhouette), so the standard camera distance leaves it
+      // looking smaller in frame — pull the camera in slightly to match.
+      zoomAdjust: 0.85,
     }),
   },
   {
-    id: "sniper-rifles",
-    label: "Sniper Rifles",
-    enabled: false,
-    weapons: [],
+    id: "launchers",
+    label: "Launchers",
+    enabled: true,
+    weapons: repeatAcrossSlots({
+      id: "hellion-salvo",
+      name: "Hellion Salvo",
+      description: "Lock-on or free fire rocket launcher. Reliable anti-vehicle weapon with anti-personnel capabilities.",
+      stats: { damage: 10, range: 7, fireRate: 1, accuracy: 7 },
+      mags: 3,
+      roundsPerMag: 1,
+      operatorMod: "None",
+      model: LAUNCHER_MODEL,
+    }),
   },
   {
     id: "shotguns",

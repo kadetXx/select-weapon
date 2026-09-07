@@ -15,6 +15,17 @@ const el = {
 const STAT_SEGMENTS = 10;
 const SLIDE_SETTLE_TIMEOUT = 750; // safety net in case transitionend is ever missed (above the 600ms slide duration)
 const FADE_SCALE_SETTLE_TIMEOUT = 400; // safety net above the fade-scale pane's transition duration
+const MAIN_DISTANCE_SCALE = 1.6;
+const CAROUSEL_DISTANCE_SCALE = 1.9;
+
+// Per-weapon fine-tune for camera distance — most models fit the standard
+// scale fine, but a model whose bounding box fits looser than the others
+// (e.g. a longer stock/bipod silhouette) can look smaller in frame than
+// its neighbors. `zoomAdjust` scales the base distance for both the main
+// viewport and the carousel thumbnails consistently.
+function scaledDistance(base, weapon) {
+  return base * (weapon.zoomAdjust ?? 1);
+}
 
 const state = {
   categoryId: defaultSelection.categoryId,
@@ -195,9 +206,10 @@ weaponCopySlider.className = "weapon-copy-slider";
 el.infoRow.appendChild(weaponCopySlider);
 el.infoRow.appendChild(statsPanel);
 
+const initialMainWeapon = getSlot(state.categoryId, state.slotIndex);
 const mainViewer = createViewer(mainCanvas, {
-  modelUrl: getSlot(state.categoryId, state.slotIndex).model,
-  distanceScale: 1.6,
+  modelUrl: initialMainWeapon.model,
+  distanceScale: scaledDistance(MAIN_DISTANCE_SCALE, initialMainWeapon),
   spinSpeed: 0.25,
   interactive: true,
   preserveDrawingBuffer: true, // needed for the toDataURL() slide-transition snapshot
@@ -219,7 +231,7 @@ function slideMainViewport(direction, weapon) {
   el.mainViewport.appendChild(ghostPane);
   void ghostPane.getBoundingClientRect(); // commit the ghost's resting position first
 
-  mainViewer.setModel(weapon.model);
+  mainViewer.setModel(weapon.model, scaledDistance(MAIN_DISTANCE_SCALE, weapon));
 
   slideIn(mainLiveLayer, direction);
   slideOut(ghostPane, direction);
@@ -317,7 +329,7 @@ function renderCarousel() {
 
       const viewer = createViewer(canvas, {
         modelUrl: weapon.model,
-        distanceScale: 1.9,
+        distanceScale: scaledDistance(CAROUSEL_DISTANCE_SCALE, weapon),
         spinSpeed: 0.15,
       });
       renderLoop.add(viewer);

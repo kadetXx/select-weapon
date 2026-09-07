@@ -16,7 +16,7 @@
   --color-btn-red: #d9463a;
 
   --font-display: "Oswald", sans-serif;
-  --font-title: "Black Ops One", sans-serif;
+  --font-title: "Exo 2", sans-serif;
   --font-body: "Inter", sans-serif;
 
   color-scheme: dark;
@@ -64,8 +64,8 @@ button {
 .title {
   font-family: var(--font-title);
   font-weight: 400;
-  font-size: 20px;
-  letter-spacing: 0.04em;
+  font-size: 23px;
+  letter-spacing: 0.08em;
   color: var(--color-gold);
   text-transform: uppercase;
   margin: 0;
@@ -320,7 +320,7 @@ button {
   flex: 1;
   height: 150px;
   background: var(--color-surface);
-  border-radius: 8px;
+  border-radius: 0;
   border: 1.5px dashed var(--color-border-muted);
   overflow: visible;
 }
@@ -350,6 +350,7 @@ button {
 }
 
 .weapon-card.active {
+  border-radius: 8px;
   border-color: transparent;
   box-shadow: 0 0 20px 2px rgba(255, 144, 18, 0.4);
 }
