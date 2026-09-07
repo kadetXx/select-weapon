@@ -53,6 +53,54 @@ button {
   padding: 40px 56px 32px;
   min-height: 100vh;
   min-height: 100dvh;
+  transform: scale(0.9);
+  transform-origin: center center;
+}
+
+.rotate-hint {
+  display: none;
+}
+
+/* Phone in portrait: render the layout at a fixed reference size, rotated
+   90deg and scaled by JS (see main.js) to fit the actual screen. Rotating
+   to landscape flips the media query and this reverts to the normal fluid
+   layout above. */
+@media (max-width: 768px) and (orientation: portrait) {
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .screen {
+    width: 1440px;
+    height: 900px;
+    min-height: 900px;
+    margin: 0;
+    flex-shrink: 0;
+    transform: rotate(90deg) scale(var(--mobile-scale, 1));
+  }
+
+  .rotate-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    color: var(--color-text-muted);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    z-index: 10;
+  }
 }
 
 /* Header */
