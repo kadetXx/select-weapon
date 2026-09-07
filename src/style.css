@@ -115,7 +115,7 @@ button {
   overflow: visible;
 }
 
-.viewport canvas {
+.viewport .viewport-media {
   position: absolute;
   top: 50%;
   left: 0;
@@ -123,15 +123,32 @@ button {
   height: 165%;
   transform: translateY(-50%);
   display: block;
+  object-fit: contain;
+}
+
+/* Slide transitions — shared by the main viewport and the info row. A pane
+   enters from the direction the user is navigating toward and the previous
+   pane exits to the opposite side, carousel-style. */
+.slide-pane {
+  position: absolute;
+  inset: 0;
+  transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Info row */
 .info-row {
+  position: relative;
+  overflow: hidden;
+  min-height: 190px;
+}
+
+.info-pane {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
   gap: 40px;
+  width: 100%;
 }
 
 .weapon-copy {

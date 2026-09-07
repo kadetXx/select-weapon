@@ -44,8 +44,12 @@ function frameObject(object, camera, distanceScale) {
  * Multiple viewers can point at the same model URL cheaply — the geometry
  * and textures are loaded once and shared via Object3D.clone().
  */
-export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed = 0.25, interactive = false }) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed = 0.25, interactive = false, preserveDrawingBuffer = false }) {
+  // preserveDrawingBuffer is only needed by viewers that get snapshotted via
+  // canvas.toDataURL() outside the render loop's own frame (e.g. for a
+  // slide-transition ghost image) — off by default since it costs memory
+  // bandwidth on every frame.
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
@@ -64,6 +68,23 @@ export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed 
   scene.add(rig);
 
   let disposed = false;
+  let currentModel = null;
+
+  function setModel(url, modelDistanceScale = distanceScale) {
+    if (currentModel) {
+      rig.remove(currentModel);
+      currentModel = null;
+    }
+    return loadModel(url).then((source) => {
+      if (disposed) return;
+      const model = source.clone(true);
+      currentModel = model;
+      rig.add(model);
+      resize();
+      frameObject(model, camera, modelDistanceScale);
+    });
+  }
+
   let autoRotatePaused = false;
   let resumeTimer = null;
   let dragCleanup = null;
@@ -130,13 +151,7 @@ export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed 
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(canvas);
 
-  loadModel(modelUrl).then((source) => {
-    if (disposed) return;
-    const model = source.clone(true);
-    rig.add(model);
-    resize();
-    frameObject(model, camera, distanceScale);
-  });
+  setModel(modelUrl);
 
   function tick(deltaSeconds) {
     if (disposed) return;
@@ -154,7 +169,7 @@ export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed 
 
   resize();
 
-  return { tick, dispose };
+  return { tick, dispose, setModel, canvas };
 }
 
 /** Drives every registered viewer off a single requestAnimationFrame loop. */

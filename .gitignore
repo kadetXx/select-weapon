@@ -1,3 +1,8 @@
 node_modules
 dist
 .DS_Store
+
+# Raw, uncompressed Meshy source exports (50MB+ each) — kept locally for the
+# planned standalone untextured-preview page, not committed. The compressed
+# versions actually used by the app live in public/models/.
+media/*-untextured.glb
