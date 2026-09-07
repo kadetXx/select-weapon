@@ -87,18 +87,36 @@ button {
   fill: var(--color-text-primary);
 }
 
-.pad-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 20px;
-  border-radius: 999px;
-  border: 1px solid var(--color-text-muted);
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  color: var(--color-text-muted);
+/* LB/RB bumper badges — a custom rounded-hexagon outline traced from the
+   reference HUD (not a plain pill), with the sharper vertex pointing toward
+   the opposite badge and RB mirroring LB's path. */
+.pad-badge {
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.pad-badge path {
+  fill: none;
+  stroke: var(--color-text-muted);
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+}
+
+.pad-badge text {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  fill: var(--color-text-muted);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* Tighten just the LB/RB pair, independent of the arrow-to-badge spacing. */
+.pad-badge-group {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
 }
 
 /* Main viewport */
