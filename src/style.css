@@ -87,9 +87,6 @@ button {
   fill: var(--color-text-primary);
 }
 
-/* LB/RB bumper badges — a custom rounded-hexagon outline traced from the
-   reference HUD (not a plain pill), with the sharper vertex pointing toward
-   the opposite badge and RB mirroring LB's path. */
 .pad-badge {
   overflow: visible;
   flex-shrink: 0;
@@ -112,7 +109,6 @@ button {
   dominant-baseline: central;
 }
 
-/* Tighten just the LB/RB pair, independent of the arrow-to-badge spacing. */
 .pad-badge-group {
   display: flex;
   flex-direction: row;
@@ -127,11 +123,7 @@ button {
   height: min(38vw, 380px);
   min-height: 220px;
   border-radius: 8px;
-  /* Reserves this box's footprint in the layout, but the canvas inside is
-     allowed to render taller than it — see .viewport canvas — so a
-     manually-rotated model overlaps neighboring content instead of being
-     hard-clipped at this container's edge. */
-  overflow: visible;
+  overflow: visible; /* canvas inside renders taller than this box, see .viewport-media */
 }
 
 .viewport .viewport-media {
@@ -145,17 +137,12 @@ button {
   object-fit: contain;
 }
 
-/* Slide transitions — shared by the main viewport and the info row. A pane
-   enters from the direction the user is navigating toward and the previous
-   pane exits to the opposite side, carousel-style. */
 .slide-pane {
   position: absolute;
   inset: 0;
   transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Weapon name/description swap — a scale+fade pop instead of a slide, so it
-   doesn't just duplicate the 3D viewport's left/right motion. */
 .fade-scale-pane {
   position: absolute;
   inset: 0;
@@ -163,9 +150,6 @@ button {
   transition: opacity 240ms ease, transform 240ms ease;
 }
 
-/* Info row — a plain flex row. Only .weapon-copy-slider slides on weapon
-   change; .stats-panel is persistent and animates its meter bars in place
-   instead (see .stat-bar span below). */
 .info-row {
   display: flex;
   flex-direction: row;

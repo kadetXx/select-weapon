@@ -23,9 +23,7 @@ function frameObject(object, camera, distanceScale) {
   const center = box.getCenter(new THREE.Vector3());
   object.position.sub(center);
 
-  // Fit both the vertical and horizontal extent of the object into the
-  // camera's frustum — on a wide canvas, fitting height alone leaves a
-  // horizontally-large object looking tiny in all the unused side space.
+  // fit both extents, not just height, or a wide object looks tiny on a wide canvas
   const verticalFov = (camera.fov * Math.PI) / 180;
   const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
 
@@ -39,16 +37,7 @@ function frameObject(object, camera, distanceScale) {
   camera.updateProjectionMatrix();
 }
 
-/**
- * Mounts a self-contained rotating viewer into `canvas`.
- * Multiple viewers can point at the same model URL cheaply — the geometry
- * and textures are loaded once and shared via Object3D.clone().
- */
 export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed = 0.25, interactive = false, preserveDrawingBuffer = false }) {
-  // preserveDrawingBuffer is only needed by viewers that get snapshotted via
-  // canvas.toDataURL() outside the render loop's own frame (e.g. for a
-  // slide-transition ghost image) — off by default since it costs memory
-  // bandwidth on every frame.
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -165,13 +154,8 @@ export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed 
     dragCleanup?.();
     resizeObserver.disconnect();
     renderer.dispose();
-    // renderer.dispose() alone frees the renderer's internal GPU resources
-    // but doesn't hand the WebGL context itself back to the browser — that
-    // happens whenever the browser's GC gets around to it. Since the
-    // carousel repeatedly creates and tears down contexts, waiting on GC
-    // eventually exhausts the browser's context limit (Chrome allows ~16),
-    // after which new contexts silently fail and render blank/white.
-    // forceContextLoss() releases it immediately and deterministically.
+    // dispose() alone doesn't free the actual WebGL context, so repeated
+    // create/destroy cycles hit the browser's context limit and go blank
     renderer.forceContextLoss();
   }
 
@@ -180,7 +164,6 @@ export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed 
   return { tick, dispose, setModel, canvas };
 }
 
-/** Drives every registered viewer off a single requestAnimationFrame loop. */
 export function createRenderLoop() {
   const viewers = new Set();
   const clock = new THREE.Clock();

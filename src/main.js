@@ -13,16 +13,11 @@ const el = {
 };
 
 const STAT_SEGMENTS = 10;
-const SLIDE_SETTLE_TIMEOUT = 750; // safety net in case transitionend is ever missed (above the 600ms slide duration)
-const FADE_SCALE_SETTLE_TIMEOUT = 400; // safety net above the fade-scale pane's transition duration
+const SLIDE_SETTLE_TIMEOUT = 750;
+const FADE_SCALE_SETTLE_TIMEOUT = 400;
 const MAIN_DISTANCE_SCALE = 1.6;
 const CAROUSEL_DISTANCE_SCALE = 1.9;
 
-// Per-weapon fine-tune for camera distance — most models fit the standard
-// scale fine, but a model whose bounding box fits looser than the others
-// (e.g. a longer stock/bipod silhouette) can look smaller in frame than
-// its neighbors. `zoomAdjust` scales the base distance for both the main
-// viewport and the carousel thumbnails consistently.
 function scaledDistance(base, weapon) {
   return base * (weapon.zoomAdjust ?? 1);
 }
@@ -46,11 +41,6 @@ function enabledCategories() {
   return categories.filter((c) => c.enabled && c.weapons.length > 0);
 }
 
-/**
- * Animates `pane` (already in its resting position) out to `-direction*100%`
- * while `enteringFrom(pane)` sets up whatever replaces it. `pane` is removed
- * once its exit transition ends (or after a timeout safety net).
- */
 function slideOut(pane, direction, onSettled) {
   let settled = false;
   const settle = () => {
@@ -64,21 +54,14 @@ function slideOut(pane, direction, onSettled) {
   pane.style.transform = `translateX(${-direction * 100}%)`;
 }
 
-/** Slides a brand-new pane in from `direction` to resting position (0%). */
 function slideIn(pane, direction) {
   pane.style.transition = "none";
   pane.style.transform = `translateX(${direction * 100}%)`;
-  void pane.getBoundingClientRect(); // force layout flush before enabling the transition
+  void pane.getBoundingClientRect(); // forces reflow
   pane.style.transition = "";
   pane.style.transform = "translateX(0%)";
 }
 
-/**
- * Scale+fade container swap (used for the weapon name/description — a
- * slide there just duplicated the 3D viewport's motion). The new pane pops
- * in from 95% scale while fading in; the old one shrinks slightly while
- * fading out. `build(paneEl)` fills the new pane.
- */
 function fadeScaleReplace(container, build) {
   const outgoing = container.currentPane;
   const incoming = document.createElement("div");
@@ -92,7 +75,7 @@ function fadeScaleReplace(container, build) {
   incoming.style.transition = "none";
   incoming.style.opacity = "0";
   incoming.style.transform = "scale(0.95)";
-  void incoming.getBoundingClientRect(); // force layout flush before enabling the transition
+  void incoming.getBoundingClientRect(); // forces reflow
   incoming.style.transition = "";
   incoming.style.opacity = "1";
   incoming.style.transform = "scale(1)";
@@ -132,11 +115,6 @@ function buildWeaponCopyPane(pane, weapon) {
   pane.appendChild(copy);
 }
 
-// --- Stats panel: persistent, never slides. Built once; weapon switches
-// just toggle each meter segment's .filled class and update the text
-// fields in place, so the CSS transition on .stat-bar span animates the
-// meter bars growing/shrinking to the new values instead of the whole
-// panel sliding off with the rest of the info row.
 const statsPanel = document.createElement("div");
 statsPanel.className = "stats-panel";
 statsPanel.innerHTML = `
@@ -158,7 +136,7 @@ statsPanel.innerHTML = `
 `;
 statsPanel.querySelectorAll(".stat-bar").forEach((bar) => buildStatBar(bar, 0));
 
-const STAT_SEGMENT_STAGGER_MS = 35; // per-segment delay so a bar lights up (or drains) one box at a time
+const STAT_SEGMENT_STAGGER_MS = 35;
 
 function updateStatsPanel(weapon) {
   for (const [stat, value] of Object.entries(weapon.stats)) {
@@ -166,17 +144,12 @@ function updateStatsPanel(weapon) {
     const oldValue = segments.filter((s) => s.classList.contains("filled")).length;
     const newValue = value;
 
-    // Delay is based on each segment's position within the *changing* group,
-    // not its absolute index — otherwise a bar whose only change is at a
-    // high index would sit waiting before it even starts, while a bar
-    // changing at low indices finishes first, making them look out of sync.
+    // delay by position within the changing group, not absolute index
     if (newValue > oldValue) {
-      // Filling: sweep left-to-right through the newly-added segments.
       for (let i = oldValue; i < newValue; i++) {
         segments[i].style.transitionDelay = `${(i - oldValue) * STAT_SEGMENT_STAGGER_MS}ms`;
       }
     } else if (newValue < oldValue) {
-      // Draining: sweep from the tip (highest index) inward.
       for (let i = newValue; i < oldValue; i++) {
         segments[i].style.transitionDelay = `${(oldValue - 1 - i) * STAT_SEGMENT_STAGGER_MS}ms`;
       }
@@ -189,11 +162,8 @@ function updateStatsPanel(weapon) {
   statsPanel.querySelector('[data-field="operatorMod"]').textContent = weapon.operatorMod;
 }
 
-// --- Main viewport: one persistent WebGL context, reused for every weapon.
-// Spinning up a new WebGLRenderer per transition is expensive enough to
-// stall the whole page for a moment, so the "slide" here works by sliding
-// a still-image snapshot of the outgoing frame away while the live canvas
-// (already updated to the new model) slides in — no second GL context.
+// one persistent WebGL context, reused for every weapon: a new renderer
+// per switch stalls the page
 const mainLiveLayer = document.createElement("div");
 mainLiveLayer.className = "slide-pane";
 const mainCanvas = document.createElement("canvas");
@@ -212,16 +182,11 @@ const mainViewer = createViewer(mainCanvas, {
   distanceScale: scaledDistance(MAIN_DISTANCE_SCALE, initialMainWeapon),
   spinSpeed: 0.25,
   interactive: true,
-  preserveDrawingBuffer: true, // needed for the toDataURL() slide-transition snapshot
+  preserveDrawingBuffer: true, // needed for the toDataURL() snapshot below
 });
 renderLoop.add(mainViewer);
 
 function slideMainViewport(direction, weapon) {
-  // Mirrors mainLiveLayer's structure exactly: a .slide-pane wrapper (which
-  // JS slides horizontally) containing a .viewport-media element (which CSS
-  // keeps vertically centered at 165% height) — keeping these as separate
-  // elements means the slide's inline transform never clobbers the media's
-  // own translateY centering.
   const ghostPane = document.createElement("div");
   ghostPane.className = "slide-pane";
   const ghostImg = document.createElement("img");
@@ -229,7 +194,7 @@ function slideMainViewport(direction, weapon) {
   ghostImg.src = mainCanvas.toDataURL("image/webp", 0.92);
   ghostPane.appendChild(ghostImg);
   el.mainViewport.appendChild(ghostPane);
-  void ghostPane.getBoundingClientRect(); // commit the ghost's resting position first
+  void ghostPane.getBoundingClientRect(); // forces reflow
 
   mainViewer.setModel(weapon.model, scaledDistance(MAIN_DISTANCE_SCALE, weapon));
 
@@ -301,10 +266,6 @@ function renderTabs() {
   }
 }
 
-// Carousel canvases are only rebuilt when the category's weapon list
-// actually changes. Re-selecting a different slot inside the same
-// category just moves the active highlight — the models are already
-// live and rendering, no need to tear anything down.
 function renderCarousel() {
   const category = getCategory(state.categoryId);
 

@@ -1,17 +1,10 @@
-// Stat values are 0–10, rendered as segmented bars in the UI.
-// `model` points at a .glb in /public/models — each enabled category has
-// its own dedicated asset today, repeated across all four carousel slots
-// until distinct per-slot models exist.
+// stats are 0-10, model paths point at /public/models
 const SMG_MODEL = "/models/smg.glb";
 const LMG_MODEL = "/models/lmg.glb";
 const SHOTGUN_MODEL = "/models/shotgun.glb";
 const LAUNCHER_MODEL = "/models/launcher.glb";
 const SLOT_COUNT = 4;
 
-// Each enabled category has exactly one real weapon today. It's repeated
-// across all four carousel slots as placeholder inventory until distinct
-// assets exist per slot — `slotId` gives each repeat a unique DOM identity
-// while every other field (name, stats, model) stays identical.
 function repeatAcrossSlots(weapon, count = SLOT_COUNT) {
   return Array.from({ length: count }, (_, i) => ({
     ...weapon,
@@ -54,10 +47,7 @@ export const categories = [
       roundsPerMag: 75,
       operatorMod: "Oppressor",
       model: LMG_MODEL,
-      // This model's bounding box fits a bit looser than the others (longer
-      // stock/bipod silhouette), so the standard camera distance leaves it
-      // looking smaller in frame — pull the camera in slightly to match.
-      zoomAdjust: 0.85,
+      zoomAdjust: 0.85, // model renders smaller than the others by default
     }),
   },
   {
