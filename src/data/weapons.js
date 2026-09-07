@@ -42,12 +42,6 @@ export const categories = [
     }),
   },
   {
-    id: "tactical-rifles",
-    label: "Tactical Rifles",
-    enabled: false,
-    weapons: [],
-  },
-  {
     id: "light-machine",
     label: "Light Machine",
     enabled: true,
@@ -95,6 +89,12 @@ export const categories = [
       operatorMod: "Dragon Breath",
       model: SHOTGUN_MODEL,
     }),
+  },
+  {
+    id: "tactical-rifles",
+    label: "Tactical Rifles",
+    enabled: false,
+    weapons: [],
   },
 ];
 
