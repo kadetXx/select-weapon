@@ -127,15 +127,31 @@ statsPanel.innerHTML = `
 `;
 statsPanel.querySelectorAll(".stat-bar").forEach((bar) => buildStatBar(bar, 0));
 
-const STAT_SEGMENT_STAGGER_MS = 45; // per-segment delay so a bar lights up (or drains) one box at a time
+const STAT_SEGMENT_STAGGER_MS = 35; // per-segment delay so a bar lights up (or drains) one box at a time
 
 function updateStatsPanel(weapon) {
   for (const [stat, value] of Object.entries(weapon.stats)) {
-    const segments = statsPanel.querySelectorAll(`.stat-bar[data-stat="${stat}"] span`);
-    segments.forEach((segment, i) => {
-      segment.style.transitionDelay = `${i * STAT_SEGMENT_STAGGER_MS}ms`;
-      segment.classList.toggle("filled", i < value);
-    });
+    const segments = [...statsPanel.querySelectorAll(`.stat-bar[data-stat="${stat}"] span`)];
+    const oldValue = segments.filter((s) => s.classList.contains("filled")).length;
+    const newValue = value;
+
+    // Delay is based on each segment's position within the *changing* group,
+    // not its absolute index — otherwise a bar whose only change is at a
+    // high index would sit waiting before it even starts, while a bar
+    // changing at low indices finishes first, making them look out of sync.
+    if (newValue > oldValue) {
+      // Filling: sweep left-to-right through the newly-added segments.
+      for (let i = oldValue; i < newValue; i++) {
+        segments[i].style.transitionDelay = `${(i - oldValue) * STAT_SEGMENT_STAGGER_MS}ms`;
+      }
+    } else if (newValue < oldValue) {
+      // Draining: sweep from the tip (highest index) inward.
+      for (let i = newValue; i < oldValue; i++) {
+        segments[i].style.transitionDelay = `${(oldValue - 1 - i) * STAT_SEGMENT_STAGGER_MS}ms`;
+      }
+    }
+
+    segments.forEach((segment, i) => segment.classList.toggle("filled", i < newValue));
   }
   statsPanel.querySelector('[data-field="mags"]').textContent = weapon.mags;
   statsPanel.querySelector('[data-field="rounds"]').textContent = weapon.roundsPerMag;
