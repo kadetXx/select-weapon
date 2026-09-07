@@ -29,6 +29,7 @@
 html,
 body {
   margin: 0;
+  overflow-x: hidden;
   background: var(--color-bg);
   color: var(--color-text-primary);
   font-family: var(--font-body);
@@ -51,6 +52,7 @@ button {
   margin: 0 auto;
   padding: 40px 56px 32px;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Header */
@@ -59,6 +61,7 @@ button {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .title {
@@ -120,8 +123,8 @@ button {
   position: relative;
   z-index: 2;
   width: 100%;
-  height: min(38vw, 380px);
-  min-height: 220px;
+  flex: 1 1 auto;
+  min-height: 180px;
   border-radius: 8px;
   overflow: visible; /* canvas inside renders taller than this box, see .viewport-media */
 }
@@ -156,6 +159,7 @@ button {
   justify-content: space-between;
   align-items: flex-start;
   gap: 40px;
+  flex-shrink: 0;
 }
 
 .weapon-copy-slider {
@@ -271,6 +275,7 @@ button {
   flex-direction: row;
   border-top: 1px solid var(--color-divider);
   border-bottom: 1px solid var(--color-divider);
+  flex-shrink: 0;
 }
 
 .tab {
@@ -313,6 +318,7 @@ button {
   flex-direction: row;
   gap: 20px;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .weapon-card {
@@ -399,6 +405,7 @@ button {
   justify-content: flex-end;
   align-items: center;
   gap: 48px;
+  flex-shrink: 0;
 }
 
 .prompt {
