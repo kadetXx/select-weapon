@@ -136,6 +136,15 @@ button {
   transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Weapon name/description swap — a scale+fade pop instead of a slide, so it
+   doesn't just duplicate the 3D viewport's left/right motion. */
+.fade-scale-pane {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transition: opacity 240ms ease, transform 240ms ease;
+}
+
 /* Info row — a plain flex row. Only .weapon-copy-slider slides on weapon
    change; .stats-panel is persistent and animates its meter bars in place
    instead (see .stat-bar span below). */

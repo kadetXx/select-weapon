@@ -14,6 +14,7 @@ const el = {
 
 const STAT_SEGMENTS = 10;
 const SLIDE_SETTLE_TIMEOUT = 750; // safety net in case transitionend is ever missed (above the 600ms slide duration)
+const FADE_SCALE_SETTLE_TIMEOUT = 400; // safety net above the fade-scale pane's transition duration
 
 const state = {
   categoryId: defaultSelection.categoryId,
@@ -62,20 +63,39 @@ function slideIn(pane, direction) {
 }
 
 /**
- * Full-DOM sliding container swap (used for the info row, which is cheap —
- * plain text/divs, no WebGL). `build(paneEl)` fills the new pane.
+ * Scale+fade container swap (used for the weapon name/description — a
+ * slide there just duplicated the 3D viewport's motion). The new pane pops
+ * in from 95% scale while fading in; the old one shrinks slightly while
+ * fading out. `build(paneEl)` fills the new pane.
  */
-function slideReplace(container, direction, build) {
+function fadeScaleReplace(container, build) {
   const outgoing = container.currentPane;
   const incoming = document.createElement("div");
-  incoming.className = "slide-pane";
+  incoming.className = "fade-scale-pane";
   build(incoming);
   container.appendChild(incoming);
   container.currentPane = incoming;
 
   if (!outgoing) return;
-  slideIn(incoming, direction);
-  slideOut(outgoing, direction);
+
+  incoming.style.transition = "none";
+  incoming.style.opacity = "0";
+  incoming.style.transform = "scale(0.95)";
+  void incoming.getBoundingClientRect(); // force layout flush before enabling the transition
+  incoming.style.transition = "";
+  incoming.style.opacity = "1";
+  incoming.style.transform = "scale(1)";
+
+  let settled = false;
+  const settle = () => {
+    if (settled) return;
+    settled = true;
+    outgoing.remove();
+  };
+  outgoing.addEventListener("transitionend", settle, { once: true });
+  setTimeout(settle, FADE_SCALE_SETTLE_TIMEOUT);
+  outgoing.style.opacity = "0";
+  outgoing.style.transform = "scale(0.95)";
 }
 
 function buildStatBar(container, value) {
@@ -209,7 +229,7 @@ function transitionToSlot(direction) {
   const weapon = getSlot(state.categoryId, state.slotIndex);
   if (!weapon) return;
   slideMainViewport(direction, weapon);
-  slideReplace(weaponCopySlider, direction, (pane) => buildWeaponCopyPane(pane, weapon));
+  fadeScaleReplace(weaponCopySlider, (pane) => buildWeaponCopyPane(pane, weapon));
   updateStatsPanel(weapon);
 }
 
@@ -334,6 +354,6 @@ renderTabs();
 renderCarousel();
 {
   const initialWeapon = getSlot(state.categoryId, state.slotIndex);
-  slideReplace(weaponCopySlider, 1, (pane) => buildWeaponCopyPane(pane, initialWeapon));
+  fadeScaleReplace(weaponCopySlider, (pane) => buildWeaponCopyPane(pane, initialWeapon));
   updateStatsPanel(initialWeapon);
 }
