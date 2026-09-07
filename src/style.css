@@ -135,27 +135,29 @@ button {
   transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Info row */
+/* Info row — a plain flex row. Only .weapon-copy-slider slides on weapon
+   change; .stats-panel is persistent and animates its meter bars in place
+   instead (see .stat-bar span below). */
 .info-row {
-  position: relative;
-  overflow: hidden;
-  min-height: 190px;
-}
-
-.info-pane {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
   gap: 40px;
-  width: 100%;
+}
+
+.weapon-copy-slider {
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  max-width: 520px;
+  min-height: 130px;
 }
 
 .weapon-copy {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-width: 520px;
 }
 
 .weapon-name-block {
@@ -242,10 +244,13 @@ button {
   flex: 1;
   border-radius: 1px;
   background: var(--color-stat-track);
+  transform: scaleY(0.55);
+  transition: background-color 260ms ease, transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .stat-bar span.filled {
   background: var(--color-stat-fill);
+  transform: scaleY(1);
 }
 
 /* Category tabs */

@@ -86,9 +86,7 @@ function buildStatBar(container, value) {
   }
 }
 
-function buildInfoPane(pane, weapon) {
-  pane.classList.add("info-pane");
-
+function buildWeaponCopyPane(pane, weapon) {
   const copy = document.createElement("div");
   copy.className = "weapon-copy";
   copy.innerHTML = `
@@ -100,35 +98,43 @@ function buildInfoPane(pane, weapon) {
   `;
   copy.querySelector(".weapon-name").textContent = weapon.name;
   copy.querySelector(".weapon-description").textContent = weapon.description;
-
-  const stats = document.createElement("div");
-  stats.className = "stats-panel";
-  stats.innerHTML = `
-    <div class="stat-row"><span class="stat-label">Damage</span><div class="stat-bar" data-stat="damage"></div></div>
-    <div class="stat-row"><span class="stat-label">Range</span><div class="stat-bar" data-stat="range"></div></div>
-    <div class="stat-row"><span class="stat-label">Fire Rate</span><div class="stat-bar" data-stat="fireRate"></div></div>
-    <div class="stat-row"><span class="stat-label">Accuracy</span><div class="stat-bar" data-stat="accuracy"></div></div>
-    <div class="divider"></div>
-    <div class="ammo-row">
-      <span class="stat-label">Mags</span>
-      <span class="stat-value" data-field="mags"></span>
-      <span class="stat-label secondary-label">Rounds / Mag</span>
-      <span class="stat-value" data-field="rounds"></span>
-    </div>
-    <div class="ammo-row">
-      <span class="stat-label">Operator Mod</span>
-      <span class="stat-value" data-field="operatorMod"></span>
-    </div>
-  `;
-  for (const [stat, value] of Object.entries(weapon.stats)) {
-    buildStatBar(stats.querySelector(`.stat-bar[data-stat="${stat}"]`), value);
-  }
-  stats.querySelector('[data-field="mags"]').textContent = weapon.mags;
-  stats.querySelector('[data-field="rounds"]').textContent = weapon.roundsPerMag;
-  stats.querySelector('[data-field="operatorMod"]').textContent = weapon.operatorMod;
-
   pane.appendChild(copy);
-  pane.appendChild(stats);
+}
+
+// --- Stats panel: persistent, never slides. Built once; weapon switches
+// just toggle each meter segment's .filled class and update the text
+// fields in place, so the CSS transition on .stat-bar span animates the
+// meter bars growing/shrinking to the new values instead of the whole
+// panel sliding off with the rest of the info row.
+const statsPanel = document.createElement("div");
+statsPanel.className = "stats-panel";
+statsPanel.innerHTML = `
+  <div class="stat-row"><span class="stat-label">Damage</span><div class="stat-bar" data-stat="damage"></div></div>
+  <div class="stat-row"><span class="stat-label">Range</span><div class="stat-bar" data-stat="range"></div></div>
+  <div class="stat-row"><span class="stat-label">Fire Rate</span><div class="stat-bar" data-stat="fireRate"></div></div>
+  <div class="stat-row"><span class="stat-label">Accuracy</span><div class="stat-bar" data-stat="accuracy"></div></div>
+  <div class="divider"></div>
+  <div class="ammo-row">
+    <span class="stat-label">Mags</span>
+    <span class="stat-value" data-field="mags"></span>
+    <span class="stat-label secondary-label">Rounds / Mag</span>
+    <span class="stat-value" data-field="rounds"></span>
+  </div>
+  <div class="ammo-row">
+    <span class="stat-label">Operator Mod</span>
+    <span class="stat-value" data-field="operatorMod"></span>
+  </div>
+`;
+statsPanel.querySelectorAll(".stat-bar").forEach((bar) => buildStatBar(bar, 0));
+
+function updateStatsPanel(weapon) {
+  for (const [stat, value] of Object.entries(weapon.stats)) {
+    const segments = statsPanel.querySelectorAll(`.stat-bar[data-stat="${stat}"] span`);
+    segments.forEach((segment, i) => segment.classList.toggle("filled", i < value));
+  }
+  statsPanel.querySelector('[data-field="mags"]').textContent = weapon.mags;
+  statsPanel.querySelector('[data-field="rounds"]').textContent = weapon.roundsPerMag;
+  statsPanel.querySelector('[data-field="operatorMod"]').textContent = weapon.operatorMod;
 }
 
 // --- Main viewport: one persistent WebGL context, reused for every weapon.
@@ -142,6 +148,11 @@ const mainCanvas = document.createElement("canvas");
 mainCanvas.className = "viewport-media";
 mainLiveLayer.appendChild(mainCanvas);
 el.mainViewport.appendChild(mainLiveLayer);
+
+const weaponCopySlider = document.createElement("div");
+weaponCopySlider.className = "weapon-copy-slider";
+el.infoRow.appendChild(weaponCopySlider);
+el.infoRow.appendChild(statsPanel);
 
 const mainViewer = createViewer(mainCanvas, {
   modelUrl: getSlot(state.categoryId, state.slotIndex).model,
@@ -177,7 +188,8 @@ function transitionToSlot(direction) {
   const weapon = getSlot(state.categoryId, state.slotIndex);
   if (!weapon) return;
   slideMainViewport(direction, weapon);
-  slideReplace(el.infoRow, direction, (pane) => buildInfoPane(pane, weapon));
+  slideReplace(weaponCopySlider, direction, (pane) => buildWeaponCopyPane(pane, weapon));
+  updateStatsPanel(weapon);
 }
 
 function selectSlot(categoryId, slotIndex) {
@@ -299,4 +311,8 @@ window.addEventListener("keydown", (event) => {
 
 renderTabs();
 renderCarousel();
-slideReplace(el.infoRow, 1, (pane) => buildInfoPane(pane, getSlot(state.categoryId, state.slotIndex)));
+{
+  const initialWeapon = getSlot(state.categoryId, state.slotIndex);
+  slideReplace(weaponCopySlider, 1, (pane) => buildWeaponCopyPane(pane, initialWeapon));
+  updateStatsPanel(initialWeapon);
+}

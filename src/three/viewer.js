@@ -165,6 +165,14 @@ export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed 
     dragCleanup?.();
     resizeObserver.disconnect();
     renderer.dispose();
+    // renderer.dispose() alone frees the renderer's internal GPU resources
+    // but doesn't hand the WebGL context itself back to the browser — that
+    // happens whenever the browser's GC gets around to it. Since the
+    // carousel repeatedly creates and tears down contexts, waiting on GC
+    // eventually exhausts the browser's context limit (Chrome allows ~16),
+    // after which new contexts silently fail and render blank/white.
+    // forceContextLoss() releases it immediately and deterministically.
+    renderer.forceContextLoss();
   }
 
   resize();
