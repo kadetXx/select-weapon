@@ -16,6 +16,7 @@
   --color-btn-red: #d9463a;
 
   --font-display: "Oswald", sans-serif;
+  --font-title: "Orbitron", sans-serif;
   --font-body: "Inter", sans-serif;
 
   color-scheme: dark;
@@ -61,10 +62,10 @@ button {
 }
 
 .title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 22px;
-  letter-spacing: 0.12em;
+  font-family: var(--font-title);
+  font-weight: 500;
+  font-size: 21px;
+  letter-spacing: 0.08em;
   color: var(--color-gold);
   text-transform: uppercase;
   margin: 0;
@@ -132,7 +133,7 @@ button {
 .slide-pane {
   position: absolute;
   inset: 0;
-  transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Info row — a plain flex row. Only .weapon-copy-slider slides on weapon

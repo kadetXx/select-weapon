@@ -13,7 +13,7 @@ const el = {
 };
 
 const STAT_SEGMENTS = 10;
-const SLIDE_SETTLE_TIMEOUT = 500; // safety net in case transitionend is ever missed
+const SLIDE_SETTLE_TIMEOUT = 750; // safety net in case transitionend is ever missed (above the 600ms slide duration)
 
 const state = {
   categoryId: defaultSelection.categoryId,
@@ -127,10 +127,15 @@ statsPanel.innerHTML = `
 `;
 statsPanel.querySelectorAll(".stat-bar").forEach((bar) => buildStatBar(bar, 0));
 
+const STAT_SEGMENT_STAGGER_MS = 45; // per-segment delay so a bar lights up (or drains) one box at a time
+
 function updateStatsPanel(weapon) {
   for (const [stat, value] of Object.entries(weapon.stats)) {
     const segments = statsPanel.querySelectorAll(`.stat-bar[data-stat="${stat}"] span`);
-    segments.forEach((segment, i) => segment.classList.toggle("filled", i < value));
+    segments.forEach((segment, i) => {
+      segment.style.transitionDelay = `${i * STAT_SEGMENT_STAGGER_MS}ms`;
+      segment.classList.toggle("filled", i < value);
+    });
   }
   statsPanel.querySelector('[data-field="mags"]').textContent = weapon.mags;
   statsPanel.querySelector('[data-field="rounds"]').textContent = weapon.roundsPerMag;
