@@ -713,10 +713,10 @@ button {
 
 /* Portrait -- phone or tablet, any width: the desktop layout is designed for
    a wide landscape-ish canvas and a 6-tab row that needs real horizontal
-   room, neither of which a portrait screen has. Stack everything, drop the
-   carousel (all 4 slots are the same placeholder weapon today anyway), and
-   let the tabs scroll horizontally instead. Landscape at any width keeps
-   the plain desktop layout untouched -- that already holds up fine. */
+   room, neither of which a portrait screen has. Stack everything and drop
+   the carousel (all 4 slots are the same placeholder weapon today anyway).
+   Landscape at any width keeps the plain desktop layout untouched -- that
+   already holds up fine. */
 @media (orientation: portrait) {
   .carousel {
     display: none;
@@ -737,14 +737,44 @@ button {
   }
 
   .category-tabs {
-    overflow-x: auto;
+    overflow: hidden;
     /* bleed past the screen's own side padding so this row runs edge to edge */
     width: calc(100% + var(--screen-padding-x) * 2);
     margin-left: calc(var(--screen-padding-x) * -1);
   }
 
+  .category-tabs-track {
+    display: flex;
+    flex-direction: row;
+    transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
   .tab {
     flex: 0 0 auto;
     padding: 16px 20px;
+  }
+
+  .title {
+    font-size: 17px;
+  }
+
+  .weapon-name {
+    font-size: 30px;
+  }
+
+  .weapon-description {
+    font-size: 15px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .stat-value {
+    font-size: 14px;
+  }
+
+  .tab-label {
+    font-size: 14px;
   }
 }

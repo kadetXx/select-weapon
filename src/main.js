@@ -25,7 +25,14 @@ const STAT_SEGMENTS = 10;
 const SLIDE_SETTLE_TIMEOUT = 750;
 const FADE_SCALE_SETTLE_TIMEOUT = 400;
 const MAIN_DISTANCE_SCALE = 1.8;
+const MOBILE_MAIN_DISTANCE_SCALE = 1.2; // portrait has the vertical room to let it read bigger
 const CAROUSEL_DISTANCE_SCALE = 1.9;
+
+const portraitQuery = window.matchMedia("(orientation: portrait)");
+
+function currentMainDistanceScale() {
+  return portraitQuery.matches ? MOBILE_MAIN_DISTANCE_SCALE : MAIN_DISTANCE_SCALE;
+}
 
 function scaledDistance(base, weapon) {
   return base * (weapon.zoomAdjust ?? 1);
@@ -193,7 +200,7 @@ el.infoRow.appendChild(statsPanel);
 const initialMainWeapon = getSlot(state.categoryId, state.slotIndex);
 const mainViewer = createViewer(mainCanvas, {
   modelUrl: initialMainWeapon.model,
-  distanceScale: scaledDistance(MAIN_DISTANCE_SCALE, initialMainWeapon),
+  distanceScale: scaledDistance(currentMainDistanceScale(), initialMainWeapon),
   spinSpeed: 0.25,
   interactive: true,
   preserveDrawingBuffer: true, // needed for the toDataURL() snapshot below
@@ -211,7 +218,7 @@ function slideMainViewport(direction, weapon) {
   el.mainViewport.appendChild(ghostPane);
   void ghostPane.getBoundingClientRect(); // forces reflow
 
-  mainViewer.setModel(weapon.model, scaledDistance(MAIN_DISTANCE_SCALE, weapon));
+  mainViewer.setModel(weapon.model, scaledDistance(currentMainDistanceScale(), weapon));
 
   slideIn(mainLiveLayer, direction);
   slideOut(ghostPane, direction);
@@ -271,28 +278,119 @@ function stepCategory(direction, source) {
   if (source !== "badge") pulse(badgeBtn);
 }
 
-function renderTabs() {
+function buildTabButton(category) {
+  const button = document.createElement("button");
+  button.className = "tab";
+  button.disabled = !category.enabled || category.weapons.length === 0;
+
+  const label = document.createElement("span");
+  label.className = "tab-label";
+  label.textContent = category.label;
+  button.appendChild(label);
+
+  if (!button.disabled) {
+    button.addEventListener("pointerenter", playHover);
+    button.addEventListener("click", () => {
+      playSelect();
+      selectCategory(category.id);
+    });
+  }
+  return button;
+}
+
+let tabsMode = null;
+let tabTrack = null;
+let tabEntries = []; // { categoryIndex, button }, two laps of `categories` back to back
+let carouselIndex = 0;
+
+function buildFlatTabs() {
   el.categoryTabs.innerHTML = "";
-  for (const category of categories) {
-    const button = document.createElement("button");
-    button.className = "tab" + (category.id === state.categoryId ? " active" : "");
-    button.disabled = !category.enabled || category.weapons.length === 0;
+  categories.forEach((category) => el.categoryTabs.appendChild(buildTabButton(category)));
+}
 
-    const label = document.createElement("span");
-    label.className = "tab-label";
-    label.textContent = category.label;
-    button.appendChild(label);
+// mobile tabs never scroll -- clicking any tab to the right slides the whole
+// row so it becomes the new left-aligned one. Going "back" just means
+// looping all the way forward, which is why the row is built two laps deep:
+// enough runway to reach any tab from any position in one slide, then a
+// transitionend snap back into lap one (invisible, since both laps are
+// identical) keeps a third lap from ever being necessary. Disabled
+// categories are left out entirely -- they're dead weight here, and with
+// two of them at opposite ends of the full list, wrapping could otherwise
+// land two in a row and push every real tab off-screen with nothing to tap.
+function buildCarouselTabs() {
+  el.categoryTabs.innerHTML = "";
+  tabTrack = document.createElement("div");
+  tabTrack.className = "category-tabs-track";
+  el.categoryTabs.appendChild(tabTrack);
 
-    if (!button.disabled) {
-      button.addEventListener("pointerenter", playHover);
-      button.addEventListener("click", () => {
-        playSelect();
-        selectCategory(category.id);
-      });
-    }
-    el.categoryTabs.appendChild(button);
+  const list = enabledCategories();
+  tabEntries = [];
+  for (let lap = 0; lap < 2; lap++) {
+    list.forEach((category, categoryIndex) => {
+      const button = buildTabButton(category);
+      tabTrack.appendChild(button);
+      tabEntries.push({ categoryIndex, button });
+    });
+  }
+
+  carouselIndex = list.findIndex((c) => c.id === state.categoryId);
+  syncCarouselPosition({ animate: false });
+}
+
+function setCarouselActive(index) {
+  tabEntries.forEach((entry, i) => entry.button.classList.toggle("active", i === index));
+}
+
+function syncCarouselPosition({ animate }) {
+  const list = enabledCategories();
+  const n = list.length;
+  const targetCategoryIndex = list.findIndex((c) => c.id === state.categoryId);
+  carouselIndex += (targetCategoryIndex - (carouselIndex % n) + n) % n;
+
+  setCarouselActive(carouselIndex);
+  if (!animate) tabTrack.style.transition = "none";
+  tabTrack.style.transform = `translateX(${-tabEntries[carouselIndex].button.offsetLeft}px)`;
+
+  if (!animate) {
+    void tabTrack.offsetWidth; // force reflow before re-enabling the transition
+    tabTrack.style.transition = "";
+  } else if (carouselIndex >= n) {
+    const resetIndex = carouselIndex - n;
+    tabTrack.addEventListener(
+      "transitionend",
+      () => {
+        tabTrack.style.transition = "none";
+        carouselIndex = resetIndex;
+        setCarouselActive(carouselIndex);
+        tabTrack.style.transform = `translateX(${-tabEntries[resetIndex].button.offsetLeft}px)`;
+        void tabTrack.offsetWidth;
+        tabTrack.style.transition = "";
+      },
+      { once: true }
+    );
   }
 }
+
+function renderTabs() {
+  const mode = portraitQuery.matches ? "carousel" : "flat";
+  const justSwitchedMode = tabsMode !== mode;
+  if (justSwitchedMode) {
+    tabsMode = mode;
+    if (mode === "carousel") buildCarouselTabs(); // syncs its own active state + position
+    else buildFlatTabs();
+  }
+  if (mode === "flat") {
+    [...el.categoryTabs.children].forEach((button, i) => button.classList.toggle("active", categories[i].id === state.categoryId));
+  } else if (!justSwitchedMode) {
+    syncCarouselPosition({ animate: true });
+  }
+}
+
+portraitQuery.addEventListener("change", () => {
+  renderTabs();
+  const weapon = getSlot(state.categoryId, state.slotIndex);
+  mainViewer.setModel(weapon.model, scaledDistance(currentMainDistanceScale(), weapon));
+});
 
 function renderCarousel() {
   const category = getCategory(state.categoryId);
