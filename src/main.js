@@ -15,7 +15,7 @@ const el = {
 const STAT_SEGMENTS = 10;
 const SLIDE_SETTLE_TIMEOUT = 750;
 const FADE_SCALE_SETTLE_TIMEOUT = 400;
-const MAIN_DISTANCE_SCALE = 1.6;
+const MAIN_DISTANCE_SCALE = 1.8;
 const CAROUSEL_DISTANCE_SCALE = 1.9;
 
 function scaledDistance(base, weapon) {
