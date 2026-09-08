@@ -401,21 +401,3 @@ renderCarousel();
   fadeScaleReplace(weaponCopySlider, (pane) => buildWeaponCopyPane(pane, initialWeapon));
   updateStatsPanel(initialWeapon);
 }
-
-// portrait phones render the layout rotated 90deg (see .screen in
-// style.css) at a fixed 1440x900 reference size, scaled to fit whatever
-// the actual screen is. driven off matchMedia/innerWidth/innerHeight only,
-// never user-agent or touch detection, so it matches devtools emulation.
-const CANVAS_WIDTH = 1440;
-const CANVAS_HEIGHT = 900;
-const mobilePortrait = window.matchMedia("(max-width: 768px) and (orientation: portrait)");
-
-function updateMobileScale() {
-  if (!mobilePortrait.matches) return;
-  const scale = Math.min(window.innerHeight / CANVAS_WIDTH, window.innerWidth / CANVAS_HEIGHT);
-  document.documentElement.style.setProperty("--mobile-scale", scale);
-}
-
-mobilePortrait.addEventListener("change", updateMobileScale);
-window.addEventListener("resize", updateMobileScale);
-updateMobileScale();
