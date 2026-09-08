@@ -1,8 +1,12 @@
-// stats are 0-10, model paths point at /public/models
-const SMG_MODEL = "/models/smg.glb";
-const LMG_MODEL = "/models/lmg.glb";
-const SHOTGUN_MODEL = "/models/shotgun.glb";
-const LAUNCHER_MODEL = "/models/launcher.glb";
+// stats are 0-10, model paths point at /public/models. these are runtime
+// strings, not static imports, so Vite's own base-path rewriting (see
+// vite.config.js) never touches them -- BASE_URL has to be prepended by hand
+// or these 404 once deployed under a subpath (e.g. GitHub Pages)
+const MODEL_BASE = import.meta.env.BASE_URL + "models/";
+const SMG_MODEL = MODEL_BASE + "smg.glb";
+const LMG_MODEL = MODEL_BASE + "lmg.glb";
+const SHOTGUN_MODEL = MODEL_BASE + "shotgun.glb";
+const LAUNCHER_MODEL = MODEL_BASE + "launcher.glb";
 const SLOT_COUNT = 4;
 
 function repeatAcrossSlots(weapon, count = SLOT_COUNT) {
