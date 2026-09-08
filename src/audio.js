@@ -7,6 +7,14 @@ export function setSoundEnabled(value) {
   enabled = value;
 }
 
+// no music implemented yet -- this just holds the toggle's state so the UI
+// has somewhere real to read/write until a track exists to gate
+let musicEnabled = true;
+
+export function setMusicEnabled(value) {
+  musicEnabled = value;
+}
+
 function getCtx() {
   if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
   if (ctx.state === "suspended") ctx.resume();

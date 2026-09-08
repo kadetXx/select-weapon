@@ -1,6 +1,6 @@
 import { categories, defaultSelection } from "./data/weapons.js";
 import { createViewer, createRenderLoop } from "./three/viewer.js";
-import { playHover, playSelect, playDenied, setSoundEnabled } from "./audio.js";
+import { playHover, playSelect, playDenied, setSoundEnabled, setMusicEnabled } from "./audio.js";
 
 const renderLoop = createRenderLoop();
 
@@ -476,15 +476,25 @@ for (const prompt of document.querySelectorAll(".prompt")) {
 // unlocks the AudioContext (hover doesn't reliably count, especially on
 // Safari), and it buys the 3D assets a head start loading behind it
 const introOverlay = document.getElementById("introOverlay");
-const soundToggle = document.getElementById("soundToggle");
 const introEnter = document.getElementById("introEnter");
 
-soundToggle.addEventListener("click", () => {
-  const nowEnabled = soundToggle.getAttribute("aria-pressed") !== "true";
-  soundToggle.setAttribute("aria-pressed", String(nowEnabled));
-  setSoundEnabled(nowEnabled);
-  if (nowEnabled) playSelect();
-});
+// each toggle exists twice (the intro modal + the floating in-app pair) --
+// clicking either instance keeps both in sync. playSelect() is called
+// unconditionally and relies on its own enabled check, so muting FX via its
+// own toggle correctly stays silent while every other toggle still confirms
+function wireToggle(buttons, setter) {
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const nowEnabled = button.getAttribute("aria-pressed") !== "true";
+      buttons.forEach((b) => b.setAttribute("aria-pressed", String(nowEnabled)));
+      setter(nowEnabled);
+      playSelect();
+    });
+  });
+}
+
+wireToggle([document.getElementById("fxToggle"), document.getElementById("floatingFxToggle")], setSoundEnabled);
+wireToggle([document.getElementById("musicToggle"), document.getElementById("floatingMusicToggle")], setMusicEnabled);
 
 introEnter.addEventListener("click", () => {
   playSelect();

@@ -619,11 +619,11 @@ button {
   gap: 28px;
 }
 
-.sound-toggle {
-  display: flex;
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
-  gap: 14px;
-  cursor: pointer;
+  width: 300px;
   padding: 14px 26px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
@@ -631,6 +631,18 @@ button {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.sound-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
   outline: none;
   transition: transform 150ms ease;
 }
@@ -689,8 +701,10 @@ button {
   font-size: 14px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  text-align: center;
   color: var(--color-accent);
-  padding: 14px 48px;
+  padding: 14px 0;
+  width: 300px;
   border-radius: 999px;
   background: rgba(255, 144, 18, 0.18);
   border: 1px solid rgba(255, 144, 18, 0.45);
@@ -709,6 +723,53 @@ button {
 
 .intro-enter:active {
   transform: scale(0.95);
+}
+
+.floating-toggles {
+  position: fixed;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.floating-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  outline: none;
+  transition: transform 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.floating-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.floating-toggle[aria-pressed="true"] {
+  color: var(--color-accent);
+  border-color: rgba(255, 144, 18, 0.4);
+}
+
+.floating-toggle:hover,
+.floating-toggle:focus-visible {
+  transform: scale(1.1);
+}
+
+.floating-toggle:active {
+  transform: scale(0.92);
 }
 
 /* Portrait -- phone or tablet, any width: the desktop layout is designed for
