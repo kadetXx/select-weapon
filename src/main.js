@@ -1,6 +1,6 @@
 import { categories, defaultSelection } from "./data/weapons.js";
 import { createViewer, createRenderLoop } from "./three/viewer.js";
-import { playHover, playSelect, playSwitchLR, playDenied } from "./audio.js";
+import { playHover, playSelect, playDenied } from "./audio.js";
 
 const renderLoop = createRenderLoop();
 
@@ -258,7 +258,7 @@ function stepCategory(direction, source) {
   // LB/RB and the on-screen arrows are the same action -- clicking either
   // (or pressing the arrow keys) pulses whichever one wasn't the direct
   // source, so it always reads as "the LB/RB pair just fired"
-  playSwitchLR();
+  playSelect();
   const arrowBtn = direction === -1 ? el.prevCategory : el.nextCategory;
   const badgeBtn = direction === -1 ? el.lbButton : el.rbButton;
   if (source !== "arrow") pulse(arrowBtn);
