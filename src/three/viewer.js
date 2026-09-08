@@ -68,7 +68,14 @@ export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed 
       if (disposed) return;
       const model = source.clone(true);
       currentModel = model;
+      // freeze to a canonical pose before measuring: the rig spins continuously,
+      // so a rotated bounding box reads a different (larger, diagonal) footprint
+      // each time, making the fit distance -- and apparent size -- random.
+      // matrixWorld only updates during render(), so force it or Box3 reads the
+      // stale (still-rotated) transform from the previous frame
+      rig.rotation.set(0, 0, 0);
       rig.add(model);
+      rig.updateMatrixWorld(true);
       resize();
       frameObject(model, camera, modelDistanceScale);
     });

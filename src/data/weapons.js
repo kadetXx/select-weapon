@@ -47,7 +47,6 @@ export const categories = [
       roundsPerMag: 75,
       operatorMod: "Oppressor",
       model: LMG_MODEL,
-      zoomAdjust: 0.85, // model renders smaller than the others by default
     }),
   },
   {
