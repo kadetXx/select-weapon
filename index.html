@@ -3,13 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A Call of Duty-style weapon select HUD, built with Three.js." />
+    <meta name="theme-color" content="#0a0a0a" />
     <title>Select Weapon</title>
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Select Weapon" />
+    <meta property="og:description" content="A Call of Duty-style weapon select HUD, built with Three.js." />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Select Weapon" />
+    <meta name="twitter:description" content="A Call of Duty-style weapon select HUD, built with Three.js." />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Exo+2:wght@400;500;700&family=Inter:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
+    <!-- the default category's model: shared by the main viewport and all
+         4 carousel cards via the model cache, so it's the one fetch that
+         actually gates first paint -- starting it during HTML parsing beats
+         waiting for the JS bundle to load and request it itself -->
+    <link rel="preload" href="/models/smg.glb" as="fetch" crossorigin />
+
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
@@ -29,11 +47,11 @@
         <h1 class="title">Select Weapon</h1>
         <div class="category-nav">
           <button class="nav-arrow" id="prevCategory" aria-label="Previous category">
-            <svg width="8" height="14" viewBox="0 0 8 14"><path d="M8 0L0 7L8 14Z" /></svg>
+            <svg width="8" height="14" viewBox="0 0 8 14" aria-hidden="true"><path d="M8 0L0 7L8 14Z" /></svg>
           </button>
           <div class="pad-badge-group">
             <button class="pad-badge-btn" id="lbButton" type="button" aria-label="Previous category">
-              <svg class="pad-badge" width="60" height="40" viewBox="0 0 75 50" aria-label="LB">
+              <svg class="pad-badge" width="60" height="40" viewBox="0 0 75 50" aria-hidden="true">
                 <path
                   d="M 59.63 20.19 Q 60 16.25 56.25 14.75 Q 35 6.25 18 21.13 Q 15 23.75 15.56 26.56 L 17.63 36.88 Q 18.75 42.5 30.38 42.5 L 45.88 42.5 Q 57.5 42.5 58.25 34.63 L 59.63 20.19 Z"
                 />
@@ -41,7 +59,7 @@
               </svg>
             </button>
             <button class="pad-badge-btn" id="rbButton" type="button" aria-label="Next category">
-              <svg class="pad-badge" width="60" height="40" viewBox="0 0 75 50" aria-label="RB">
+              <svg class="pad-badge" width="60" height="40" viewBox="0 0 75 50" aria-hidden="true">
                 <path
                   d="M 15.37 20.19 Q 15 16.25 18.75 14.75 Q 40 6.25 57 21.13 Q 60 23.75 59.44 26.56 L 57.37 36.88 Q 56.25 42.5 44.62 42.5 L 29.12 42.5 Q 17.5 42.5 16.75 34.63 L 15.37 20.19 Z"
                 />
@@ -50,7 +68,7 @@
             </button>
           </div>
           <button class="nav-arrow" id="nextCategory" aria-label="Next category">
-            <svg width="8" height="14" viewBox="0 0 8 14"><path d="M0 0L8 7L0 14Z" /></svg>
+            <svg width="8" height="14" viewBox="0 0 8 14" aria-hidden="true"><path d="M0 0L8 7L0 14Z" /></svg>
           </button>
         </div>
       </header>
@@ -59,9 +77,9 @@
 
       <div class="info-row" id="infoRow"></div>
 
-      <nav class="category-tabs" id="categoryTabs"></nav>
+      <nav class="category-tabs" id="categoryTabs" aria-label="Weapon categories"></nav>
 
-      <div class="carousel" id="carousel"></div>
+      <div class="carousel" id="carousel" role="group" aria-label="Weapon slots"></div>
 
       <footer class="footer-prompts">
         <button class="prompt select" type="button" aria-label="Select">

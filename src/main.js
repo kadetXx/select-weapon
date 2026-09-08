@@ -21,6 +21,12 @@ function pulse(target) {
   target.classList.add("pulse-feedback");
 }
 
+function setActive(button, isActive) {
+  button.classList.toggle("active", isActive);
+  if (isActive) button.setAttribute("aria-current", "true");
+  else button.removeAttribute("aria-current");
+}
+
 const STAT_SEGMENTS = 10;
 const SLIDE_SETTLE_TIMEOUT = 750;
 const FADE_SCALE_SETTLE_TIMEOUT = 400;
@@ -184,6 +190,7 @@ const mainLiveLayer = document.createElement("div");
 mainLiveLayer.className = "slide-pane";
 const mainCanvas = document.createElement("canvas");
 mainCanvas.className = "viewport-media";
+mainCanvas.setAttribute("aria-hidden", "true"); // the weapon name/description right below it are the real accessible content
 mainLiveLayer.appendChild(mainCanvas);
 el.mainViewport.appendChild(mainLiveLayer);
 
@@ -298,10 +305,15 @@ function buildTabButton(category) {
   return button;
 }
 
-let tabsMode = null;
-let tabTrack = null;
-let tabEntries = []; // { categoryIndex, button }, two laps of `categories` back to back
-let carouselIndex = 0;
+// tab-track state is kept separate from `state` (the app's weapon/category
+// selection) and named distinctly from the weapon carousel (renderCarousel,
+// state.carouselViewers) -- "carousel" already means something else here
+const tabTrackState = {
+  mode: null, // "flat" (desktop/landscape) | "carousel" (portrait)
+  track: null,
+  entries: [], // { categoryIndex, button }, two laps of the enabled list back to back
+  activeIndex: 0,
+};
 
 function buildFlatTabs() {
   el.categoryTabs.innerHTML = "";
@@ -317,54 +329,56 @@ function buildFlatTabs() {
 // categories are left out entirely -- they're dead weight here, and with
 // two of them at opposite ends of the full list, wrapping could otherwise
 // land two in a row and push every real tab off-screen with nothing to tap.
-function buildCarouselTabs() {
+function buildTabTrack() {
   el.categoryTabs.innerHTML = "";
-  tabTrack = document.createElement("div");
-  tabTrack.className = "category-tabs-track";
-  el.categoryTabs.appendChild(tabTrack);
+  tabTrackState.track = document.createElement("div");
+  tabTrackState.track.className = "category-tabs-track";
+  el.categoryTabs.appendChild(tabTrackState.track);
 
   const list = enabledCategories();
-  tabEntries = [];
+  tabTrackState.entries = [];
   for (let lap = 0; lap < 2; lap++) {
     list.forEach((category, categoryIndex) => {
       const button = buildTabButton(category);
-      tabTrack.appendChild(button);
-      tabEntries.push({ categoryIndex, button });
+      tabTrackState.track.appendChild(button);
+      tabTrackState.entries.push({ categoryIndex, button });
     });
   }
 
-  carouselIndex = list.findIndex((c) => c.id === state.categoryId);
-  syncCarouselPosition({ animate: false });
+  tabTrackState.activeIndex = list.findIndex((c) => c.id === state.categoryId);
+  syncTabTrackPosition({ animate: false });
 }
 
-function setCarouselActive(index) {
-  tabEntries.forEach((entry, i) => entry.button.classList.toggle("active", i === index));
+function markActiveTabEntry(index) {
+  tabTrackState.entries.forEach((entry, i) => setActive(entry.button, i === index));
 }
 
-function syncCarouselPosition({ animate }) {
+function syncTabTrackPosition({ animate }) {
+  const { track, entries } = tabTrackState;
   const list = enabledCategories();
   const n = list.length;
   const targetCategoryIndex = list.findIndex((c) => c.id === state.categoryId);
-  carouselIndex += (targetCategoryIndex - (carouselIndex % n) + n) % n;
+  tabTrackState.activeIndex += (targetCategoryIndex - (tabTrackState.activeIndex % n) + n) % n;
+  const { activeIndex } = tabTrackState;
 
-  setCarouselActive(carouselIndex);
-  if (!animate) tabTrack.style.transition = "none";
-  tabTrack.style.transform = `translateX(${-tabEntries[carouselIndex].button.offsetLeft}px)`;
+  markActiveTabEntry(activeIndex);
+  if (!animate) track.style.transition = "none";
+  track.style.transform = `translateX(${-entries[activeIndex].button.offsetLeft}px)`;
 
   if (!animate) {
-    void tabTrack.offsetWidth; // force reflow before re-enabling the transition
-    tabTrack.style.transition = "";
-  } else if (carouselIndex >= n) {
-    const resetIndex = carouselIndex - n;
-    tabTrack.addEventListener(
+    void track.offsetWidth; // force reflow before re-enabling the transition
+    track.style.transition = "";
+  } else if (activeIndex >= n) {
+    const resetIndex = activeIndex - n;
+    track.addEventListener(
       "transitionend",
       () => {
-        tabTrack.style.transition = "none";
-        carouselIndex = resetIndex;
-        setCarouselActive(carouselIndex);
-        tabTrack.style.transform = `translateX(${-tabEntries[resetIndex].button.offsetLeft}px)`;
-        void tabTrack.offsetWidth;
-        tabTrack.style.transition = "";
+        track.style.transition = "none";
+        tabTrackState.activeIndex = resetIndex;
+        markActiveTabEntry(resetIndex);
+        track.style.transform = `translateX(${-entries[resetIndex].button.offsetLeft}px)`;
+        void track.offsetWidth;
+        track.style.transition = "";
       },
       { once: true }
     );
@@ -373,16 +387,16 @@ function syncCarouselPosition({ animate }) {
 
 function renderTabs() {
   const mode = portraitQuery.matches ? "carousel" : "flat";
-  const justSwitchedMode = tabsMode !== mode;
+  const justSwitchedMode = tabTrackState.mode !== mode;
   if (justSwitchedMode) {
-    tabsMode = mode;
-    if (mode === "carousel") buildCarouselTabs(); // syncs its own active state + position
+    tabTrackState.mode = mode;
+    if (mode === "carousel") buildTabTrack(); // syncs its own active state + position
     else buildFlatTabs();
   }
   if (mode === "flat") {
-    [...el.categoryTabs.children].forEach((button, i) => button.classList.toggle("active", categories[i].id === state.categoryId));
+    [...el.categoryTabs.children].forEach((button, i) => setActive(button, categories[i].id === state.categoryId));
   } else if (!justSwitchedMode) {
-    syncCarouselPosition({ animate: true });
+    syncTabTrackPosition({ animate: true });
   }
 }
 
@@ -403,8 +417,10 @@ function renderCarousel() {
     category.weapons.forEach((weapon) => {
       const card = document.createElement("button");
       card.className = "weapon-card is-loading";
+      card.setAttribute("aria-label", weapon.name);
 
       const canvas = document.createElement("canvas");
+      canvas.setAttribute("aria-hidden", "true");
       card.appendChild(canvas);
 
       const spinner = document.createElement("div");
@@ -433,7 +449,7 @@ function renderCarousel() {
   }
 
   [...el.carousel.children].forEach((card, index) => {
-    card.classList.toggle("active", index === state.slotIndex);
+    setActive(card, index === state.slotIndex);
     card.onclick = () => {
       playSelect();
       selectSlot(state.categoryId, index);
@@ -450,15 +466,16 @@ function renderCarousel() {
   });
 }
 
-el.prevCategory.addEventListener("pointerenter", playHover);
-el.nextCategory.addEventListener("pointerenter", playHover);
-el.lbButton.addEventListener("pointerenter", playHover);
-el.rbButton.addEventListener("pointerenter", playHover);
-
-el.prevCategory.addEventListener("click", () => stepCategory(-1, "arrow"));
-el.nextCategory.addEventListener("click", () => stepCategory(1, "arrow"));
-el.lbButton.addEventListener("click", () => stepCategory(-1, "badge"));
-el.rbButton.addEventListener("click", () => stepCategory(1, "badge"));
+const categoryControls = [
+  { button: el.prevCategory, direction: -1, source: "arrow" },
+  { button: el.nextCategory, direction: 1, source: "arrow" },
+  { button: el.lbButton, direction: -1, source: "badge" },
+  { button: el.rbButton, direction: 1, source: "badge" },
+];
+for (const { button, direction, source } of categoryControls) {
+  button.addEventListener("pointerenter", playHover);
+  button.addEventListener("click", () => stepCategory(direction, source));
+}
 
 window.addEventListener("keydown", (event) => {
   if (event.key === "ArrowLeft") stepCategory(-1, "keyboard");
