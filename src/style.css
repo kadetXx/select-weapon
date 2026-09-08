@@ -284,6 +284,39 @@ button {
   object-fit: contain;
 }
 
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  border: 3px dashed var(--color-accent);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity 200ms ease;
+  animation: spinner-rotate 900ms linear infinite;
+}
+
+.loading-spinner.small {
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-width: 2px;
+}
+
+.is-loading .loading-spinner {
+  opacity: 0.85;
+}
+
+@keyframes spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .slide-pane {
   position: absolute;
   inset: 0;
