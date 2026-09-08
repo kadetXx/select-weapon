@@ -56,6 +56,11 @@ button {
   top: 0;
   left: 0;
   width: calc(100vw / 0.9);
+  /* dvh isn't understood by every browser (older Safari/WebKit in
+     particular) -- the plain vh line is a fallback for those; dvh
+     overrides it where supported and tracks the mobile chrome
+     showing/hiding instead of leaving a gap or clipping content */
+  height: calc(100vh / 0.9);
   height: calc(100dvh / 0.9);
   transform: scale(0.9);
   transform-origin: top left;
@@ -719,6 +724,21 @@ button {
    Landscape at any width keeps the plain desktop layout untouched -- that
    already holds up fine. */
 @media (orientation: portrait) {
+  /* controller-style select/back hints don't mean anything on a touchscreen;
+     dropping them lets the category tabs sit at the bottom of the screen
+     instead of leaving a redundant row under them */
+  .footer-prompts {
+    display: none;
+  }
+
+  /* fills the screen with no scroll fallback on mobile -- the desktop
+     short-window fallback (see .scale-wrapper) isn't needed here since
+     dropping the carousel and footer prompts already frees up enough
+     vertical room */
+  .scale-wrapper {
+    overflow-y: hidden;
+  }
+
   .carousel {
     display: none;
   }
