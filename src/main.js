@@ -325,6 +325,7 @@ function renderCarousel() {
         modelUrl: weapon.model,
         distanceScale: scaledDistance(CAROUSEL_DISTANCE_SCALE, weapon),
         spinSpeed: 0.15,
+        onReady: () => card.classList.remove("is-loading"),
       });
       renderLoop.add(viewer);
       state.carouselViewers.push(viewer);
