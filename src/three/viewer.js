@@ -87,7 +87,10 @@ export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed 
 
   if (interactive) {
     const ROTATE_SPEED = 0.008;
-    const PITCH_LIMIT = 1.1;
+    // capped well short of the theoretical framing limit: past this, a
+    // rotated model's silhouette can grow past what the camera fit for at
+    // rest and get clipped by the frustum edge (verified empirically per weapon)
+    const PITCH_LIMIT = 0.45;
     const RESUME_DELAY = 1500;
     let dragging = false;
     let lastX = 0;
