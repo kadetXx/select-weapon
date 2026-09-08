@@ -498,21 +498,18 @@ for (const prompt of document.querySelectorAll(".prompt")) {
 // unlocks the AudioContext (hover doesn't reliably count, especially on
 // Safari), and it buys the 3D assets a head start loading behind it
 const introOverlay = document.getElementById("introOverlay");
-const soundToggle = document.getElementById("soundToggle");
-const introEnter = document.getElementById("introEnter");
+const soundOff = document.getElementById("soundOff");
+const soundOn = document.getElementById("soundOn");
 
-soundToggle.addEventListener("click", () => {
-  const nowEnabled = soundToggle.getAttribute("aria-pressed") !== "true";
-  soundToggle.setAttribute("aria-pressed", String(nowEnabled));
-  setSoundEnabled(nowEnabled);
-  if (nowEnabled) playSelect();
-});
-
-introEnter.addEventListener("click", () => {
-  playSelect();
+function enterWithSound(enabled) {
+  setSoundEnabled(enabled);
+  if (enabled) playSelect();
   introOverlay.classList.add("dismissed");
   setTimeout(() => introOverlay.remove(), 450);
-});
+}
+
+soundOff.addEventListener("click", () => enterWithSound(false));
+soundOn.addEventListener("click", () => enterWithSound(true));
 
 renderTabs();
 renderCarousel();
