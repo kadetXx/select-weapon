@@ -621,7 +621,9 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg);
+  background: rgba(10, 10, 10, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   transition: opacity 400ms ease;
 }
 
@@ -636,9 +638,9 @@ button {
   align-items: center;
   gap: 32px;
   padding: 48px 64px;
-  border: 1px solid var(--color-divider);
+  border-radius: 0;
+  border: 1.5px dashed var(--color-border-muted);
   background: var(--color-surface);
-  border-radius: 4px;
 }
 
 .intro-title {

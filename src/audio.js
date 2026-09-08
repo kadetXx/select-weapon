@@ -59,13 +59,13 @@ export function playHover() {
   tone({ freq: 1100, duration: 0.045, type: "sine", gain: 0.05 });
 }
 
-// shared "confirm" sound for tabs, weapon cards, and LB/RB -- a crisp
-// filtered-noise transient plus a tonal blip reads far more like a game
-// menu select than a plain oscillator sweep
+// shared "confirm" sound for tabs, weapon cards, and LB/RB -- a soft click
+// under a two-note rising chime, the classic console-menu confirm interval
 export function playSelect() {
   if (!enabled) return;
-  click({ duration: 0.02, gain: 0.16, freq: 3000 });
-  tone({ freq: 600, freqEnd: 950, duration: 0.07, type: "square", gain: 0.1, delay: 0.008 });
+  click({ duration: 0.015, gain: 0.13, freq: 1800 });
+  tone({ freq: 660, duration: 0.05, type: "triangle", gain: 0.13 });
+  tone({ freq: 990, duration: 0.065, type: "triangle", gain: 0.11, delay: 0.035 });
 }
 
 export function playDenied() {
