@@ -94,7 +94,7 @@ button {
 .title {
   font-family: var(--font-title);
   font-weight: 400;
-  font-size: 19px;
+  font-size: 20px;
   letter-spacing: 0.08em;
   color: var(--color-gold);
   text-transform: uppercase;
