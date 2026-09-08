@@ -601,8 +601,8 @@ button {
   align-items: center;
   justify-content: center;
   background: rgba(10, 10, 10, 0.32);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(28px);
+  backdrop-filter: blur(28px);
   transition: opacity 400ms ease;
 }
 
