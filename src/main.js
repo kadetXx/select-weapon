@@ -1,16 +1,25 @@
 import { categories, defaultSelection } from "./data/weapons.js";
 import { createViewer, createRenderLoop } from "./three/viewer.js";
+import { playHover, playSelect, playSwitchLR, playDenied } from "./audio.js";
 
 const renderLoop = createRenderLoop();
 
 const el = {
   prevCategory: document.getElementById("prevCategory"),
   nextCategory: document.getElementById("nextCategory"),
+  lbButton: document.getElementById("lbButton"),
+  rbButton: document.getElementById("rbButton"),
   mainViewport: document.getElementById("mainViewport"),
   infoRow: document.getElementById("infoRow"),
   categoryTabs: document.getElementById("categoryTabs"),
   carousel: document.getElementById("carousel"),
 };
+
+function pulse(target) {
+  target.classList.remove("pulse-feedback");
+  void target.offsetWidth; // restart the animation even if it's mid-run
+  target.classList.add("pulse-feedback");
+}
 
 const STAT_SEGMENTS = 10;
 const SLIDE_SETTLE_TIMEOUT = 750;
@@ -240,11 +249,20 @@ function selectCategory(categoryId, explicitDirection) {
   transitionToSlot(direction);
 }
 
-function stepCategory(direction) {
+function stepCategory(direction, source) {
   const list = enabledCategories();
   const currentIndex = list.findIndex((c) => c.id === state.categoryId);
   const nextIndex = (currentIndex + direction + list.length) % list.length;
   selectCategory(list[nextIndex].id, direction);
+
+  // LB/RB and the on-screen arrows are the same action -- clicking either
+  // (or pressing the arrow keys) pulses whichever one wasn't the direct
+  // source, so it always reads as "the LB/RB pair just fired"
+  playSwitchLR();
+  const arrowBtn = direction === -1 ? el.prevCategory : el.nextCategory;
+  const badgeBtn = direction === -1 ? el.lbButton : el.rbButton;
+  if (source !== "arrow") pulse(arrowBtn);
+  if (source !== "badge") pulse(badgeBtn);
 }
 
 function renderTabs() {
@@ -260,7 +278,11 @@ function renderTabs() {
     button.appendChild(label);
 
     if (!button.disabled) {
-      button.addEventListener("click", () => selectCategory(category.id));
+      button.addEventListener("pointerenter", playHover);
+      button.addEventListener("click", () => {
+        playSelect();
+        selectCategory(category.id);
+      });
     }
     el.categoryTabs.appendChild(button);
   }
@@ -286,6 +308,7 @@ function renderCarousel() {
       chip.textContent = weapon.name;
       card.appendChild(chip);
 
+      card.addEventListener("pointerenter", playHover);
       el.carousel.appendChild(card);
 
       const viewer = createViewer(canvas, {
@@ -302,7 +325,10 @@ function renderCarousel() {
 
   [...el.carousel.children].forEach((card, index) => {
     card.classList.toggle("active", index === state.slotIndex);
-    card.onclick = () => selectSlot(state.categoryId, index);
+    card.onclick = () => {
+      playSelect();
+      selectSlot(state.categoryId, index);
+    };
 
     card.querySelectorAll(".bracket").forEach((b) => b.remove());
     if (index === state.slotIndex) {
@@ -315,13 +341,27 @@ function renderCarousel() {
   });
 }
 
-el.prevCategory.addEventListener("click", () => stepCategory(-1));
-el.nextCategory.addEventListener("click", () => stepCategory(1));
+el.prevCategory.addEventListener("pointerenter", playHover);
+el.nextCategory.addEventListener("pointerenter", playHover);
+el.lbButton.addEventListener("pointerenter", playHover);
+el.rbButton.addEventListener("pointerenter", playHover);
+
+el.prevCategory.addEventListener("click", () => stepCategory(-1, "arrow"));
+el.nextCategory.addEventListener("click", () => stepCategory(1, "arrow"));
+el.lbButton.addEventListener("click", () => stepCategory(-1, "badge"));
+el.rbButton.addEventListener("click", () => stepCategory(1, "badge"));
 
 window.addEventListener("keydown", (event) => {
-  if (event.key === "ArrowLeft") stepCategory(-1);
-  if (event.key === "ArrowRight") stepCategory(1);
+  if (event.key === "ArrowLeft") stepCategory(-1, "keyboard");
+  if (event.key === "ArrowRight") stepCategory(1, "keyboard");
 });
+
+// X/B are decorative prompts -- this UI has no actual select/back flow,
+// so clicking them plays a "can't do that" buzz instead of a real action
+for (const promptIcon of document.querySelectorAll(".prompt-icon")) {
+  promptIcon.addEventListener("pointerenter", playHover);
+  promptIcon.addEventListener("click", playDenied);
+}
 
 renderTabs();
 renderCarousel();

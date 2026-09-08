@@ -134,6 +134,11 @@ button {
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
+  /* the main viewport's canvas overscans upward behind here for the immersive
+     overlap look; it's transparent up here but still hit-tests as opaque, so
+     the header needs to sit above it in the stacking order to stay clickable */
+  position: relative;
+  z-index: 3;
 }
 
 .title {
@@ -153,6 +158,15 @@ button {
   gap: 10px;
 }
 
+.nav-arrow {
+  outline: none;
+  transition: transform 150ms ease, filter 150ms ease;
+}
+
+.nav-arrow:focus-visible {
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+}
+
 .nav-arrow svg {
   display: block;
   fill: var(--color-text-muted);
@@ -160,6 +174,15 @@ button {
 
 .nav-arrow:hover svg {
   fill: var(--color-text-primary);
+}
+
+.nav-arrow:hover,
+.nav-arrow:focus-visible {
+  transform: scale(1.2);
+}
+
+.nav-arrow:active {
+  transform: scale(0.88);
 }
 
 .pad-badge {
@@ -172,6 +195,7 @@ button {
   stroke: var(--color-text-muted);
   stroke-width: 2.4;
   stroke-linejoin: round;
+  transition: stroke 150ms ease;
 }
 
 .pad-badge text {
@@ -182,12 +206,55 @@ button {
   fill: var(--color-text-muted);
   text-anchor: middle;
   dominant-baseline: central;
+  transition: fill 150ms ease;
+}
+
+.pad-badge-btn:hover .pad-badge path,
+.pad-badge-btn:focus-visible .pad-badge path {
+  stroke: var(--color-text-primary);
+}
+
+.pad-badge-btn:hover .pad-badge text,
+.pad-badge-btn:focus-visible .pad-badge text {
+  fill: var(--color-text-primary);
 }
 
 .pad-badge-group {
   display: flex;
   flex-direction: row;
   gap: 4px;
+}
+
+.pad-badge-btn {
+  display: flex;
+  cursor: pointer;
+  outline: none;
+  transition: transform 150ms ease;
+}
+
+.pad-badge-btn:hover,
+.pad-badge-btn:focus-visible {
+  transform: scale(1.12);
+}
+
+.pad-badge-btn:active {
+  transform: scale(0.92);
+}
+
+@keyframes pulse-feedback {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pulse-feedback {
+  animation: pulse-feedback 260ms ease;
 }
 
 /* Main viewport */
@@ -498,6 +565,18 @@ button {
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.prompt-icon:hover,
+.prompt-icon:focus-visible {
+  transform: scale(1.18);
+}
+
+.prompt-icon:active {
+  transform: scale(0.88);
 }
 
 .prompt-icon.select {
@@ -505,9 +584,17 @@ button {
   color: var(--color-btn-blue);
 }
 
+.prompt-icon.select:focus-visible {
+  box-shadow: 0 0 0 3px rgba(92, 130, 224, 0.35);
+}
+
 .prompt-icon.back {
   border: 1.5px solid var(--color-btn-red);
   color: var(--color-btn-red);
+}
+
+.prompt-icon.back:focus-visible {
+  box-shadow: 0 0 0 3px rgba(217, 70, 58, 0.35);
 }
 
 .prompt-label {
