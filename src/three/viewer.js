@@ -37,7 +37,7 @@ function frameObject(object, camera, distanceScale) {
   camera.updateProjectionMatrix();
 }
 
-export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed = 0.25, interactive = false, preserveDrawingBuffer = false }) {
+export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed = 0.25, interactive = false, preserveDrawingBuffer = false, onReady }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -150,7 +150,7 @@ export function createViewer(canvas, { modelUrl, distanceScale = 1.6, spinSpeed 
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(canvas);
 
-  setModel(modelUrl);
+  setModel(modelUrl).then(() => onReady?.());
 
   function tick(deltaSeconds) {
     if (disposed) return;

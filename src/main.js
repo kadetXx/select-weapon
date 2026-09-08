@@ -180,6 +180,11 @@ mainCanvas.className = "viewport-media";
 mainLiveLayer.appendChild(mainCanvas);
 el.mainViewport.appendChild(mainLiveLayer);
 
+const mainSpinner = document.createElement("div");
+mainSpinner.className = "loading-spinner";
+el.mainViewport.appendChild(mainSpinner);
+el.mainViewport.classList.add("is-loading");
+
 const weaponCopySlider = document.createElement("div");
 weaponCopySlider.className = "weapon-copy-slider";
 el.infoRow.appendChild(weaponCopySlider);
@@ -192,6 +197,7 @@ const mainViewer = createViewer(mainCanvas, {
   spinSpeed: 0.25,
   interactive: true,
   preserveDrawingBuffer: true, // needed for the toDataURL() snapshot below
+  onReady: () => el.mainViewport.classList.remove("is-loading"),
 });
 renderLoop.add(mainViewer);
 
@@ -298,10 +304,14 @@ function renderCarousel() {
 
     category.weapons.forEach((weapon) => {
       const card = document.createElement("button");
-      card.className = "weapon-card";
+      card.className = "weapon-card is-loading";
 
       const canvas = document.createElement("canvas");
       card.appendChild(canvas);
+
+      const spinner = document.createElement("div");
+      spinner.className = "loading-spinner small";
+      card.appendChild(spinner);
 
       const chip = document.createElement("span");
       chip.className = "name-chip";
