@@ -2,6 +2,11 @@ import { categories, defaultSelection } from "./data/weapons.js";
 import { createViewer, createRenderLoop } from "./three/viewer.js";
 import { playHover, playSelect, playDenied, setSoundEnabled } from "./audio.js";
 
+// the Google Fonts link is preloaded (not render-blocking) in the HTML head --
+// promote it to an active stylesheet once the module script runs
+const fontsLink = document.getElementById("fontsStylesheet");
+if (fontsLink) fontsLink.rel = "stylesheet";
+
 const renderLoop = createRenderLoop();
 
 const el = {
