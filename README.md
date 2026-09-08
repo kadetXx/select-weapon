@@ -4,11 +4,11 @@ A 3D FPS weapon select HUD for the web. Browse weapon categories and inspect 3D 
 
 ## Tech
 
-- **Three.js** — renders the 3D weapon models (glTF/GLB, WebP-compressed textures, Meshopt-compressed geometry)
-- **Vanilla JavaScript** — UI state and interactions, no framework
-- **HTML/CSS** — layout and styling
-- **Vite** — dev server and production build
-- **Meshy** — AI-generated 3D weapon models
+- **Three.js**: 3D browser rendering (glTF/GLB, WebP-compressed textures, Meshopt-compressed geometry)
+- **Vanilla JS**: UI state and interactions
+- **HTML/CSS**: layout and styling
+- **Vite**: dev server and production build
+- **Meshy**: 3D weapon models
 
 ## Getting started
 
