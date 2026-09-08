@@ -1,6 +1,6 @@
 import { categories, defaultSelection } from "./data/weapons.js";
 import { createViewer, createRenderLoop } from "./three/viewer.js";
-import { playHover, playSelect, playDenied } from "./audio.js";
+import { playHover, playSelect, playDenied, setSoundEnabled } from "./audio.js";
 
 const renderLoop = createRenderLoop();
 
@@ -362,6 +362,26 @@ for (const promptIcon of document.querySelectorAll(".prompt-icon")) {
   promptIcon.addEventListener("pointerenter", playHover);
   promptIcon.addEventListener("click", playDenied);
 }
+
+// intro overlay: its Enter click is the guaranteed user gesture that
+// unlocks the AudioContext (hover doesn't reliably count, especially on
+// Safari), and it buys the 3D assets a head start loading behind it
+const introOverlay = document.getElementById("introOverlay");
+const soundToggle = document.getElementById("soundToggle");
+const introEnter = document.getElementById("introEnter");
+
+soundToggle.addEventListener("click", () => {
+  const nowEnabled = soundToggle.getAttribute("aria-pressed") !== "true";
+  soundToggle.setAttribute("aria-pressed", String(nowEnabled));
+  setSoundEnabled(nowEnabled);
+  if (nowEnabled) playSelect();
+});
+
+introEnter.addEventListener("click", () => {
+  playSelect();
+  introOverlay.classList.add("dismissed");
+  setTimeout(() => introOverlay.remove(), 450);
+});
 
 renderTabs();
 renderCarousel();

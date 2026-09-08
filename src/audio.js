@@ -1,6 +1,11 @@
 // synthesized HUD sounds via Web Audio -- zero asset weight, nothing to load
 let ctx = null;
 let noiseBuffer = null;
+let enabled = true;
+
+export function setSoundEnabled(value) {
+  enabled = value;
+}
 
 function getCtx() {
   if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -50,6 +55,7 @@ function click({ duration = 0.02, gain = 0.16, freq = 3000, delay = 0 }) {
 }
 
 export function playHover() {
+  if (!enabled) return;
   tone({ freq: 1100, duration: 0.045, type: "sine", gain: 0.05 });
 }
 
@@ -57,11 +63,13 @@ export function playHover() {
 // filtered-noise transient plus a tonal blip reads far more like a game
 // menu select than a plain oscillator sweep
 export function playSelect() {
+  if (!enabled) return;
   click({ duration: 0.02, gain: 0.16, freq: 3000 });
   tone({ freq: 600, freqEnd: 950, duration: 0.07, type: "square", gain: 0.1, delay: 0.008 });
 }
 
 export function playDenied() {
+  if (!enabled) return;
   tone({ freq: 180, duration: 0.1, type: "sawtooth", gain: 0.1 });
   tone({ freq: 150, duration: 0.12, type: "sawtooth", gain: 0.08, delay: 0.03 });
 }

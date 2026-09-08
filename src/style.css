@@ -610,3 +610,123 @@ button {
   color: var(--color-text-muted);
   text-transform: uppercase;
 }
+
+/* Intro overlay: doubles as the audio-unlock gesture (autoplay policy needs
+   a real click, hover doesn't reliably count) and buys the 3D assets a
+   head start loading behind it */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  transition: opacity 400ms ease;
+}
+
+.intro-overlay.dismissed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  padding: 48px 64px;
+  border: 1px solid var(--color-divider);
+  background: var(--color-surface);
+  border-radius: 4px;
+}
+
+.intro-title {
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 28px;
+  letter-spacing: 0.1em;
+  color: var(--color-gold);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.sound-toggle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+}
+
+.sound-toggle-label {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.sound-toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--color-stat-track);
+  transition: background-color 200ms ease;
+}
+
+.sound-toggle-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  transition: transform 200ms ease, background-color 200ms ease;
+}
+
+.sound-toggle[aria-pressed="true"] .sound-toggle-switch {
+  background: var(--color-accent-dim);
+}
+
+.sound-toggle[aria-pressed="true"] .sound-toggle-switch::after {
+  transform: translateX(20px);
+  background: var(--color-accent);
+}
+
+.sound-toggle:focus-visible .sound-toggle-switch {
+  box-shadow: 0 0 0 3px rgba(255, 144, 18, 0.35);
+}
+
+.intro-enter {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1a1200;
+  background: var(--color-accent);
+  padding: 14px 48px;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 0 24px 4px rgba(255, 144, 18, 0.4);
+  transition: transform 150ms ease;
+}
+
+.intro-enter:hover,
+.intro-enter:focus-visible {
+  transform: scale(1.06);
+}
+
+.intro-enter:active {
+  transform: scale(0.95);
+}
