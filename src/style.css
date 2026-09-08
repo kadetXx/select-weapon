@@ -621,7 +621,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(10, 10, 10, 0.55);
+  background: rgba(10, 10, 10, 0.32);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   transition: opacity 400ms ease;
@@ -632,25 +632,24 @@ button {
   pointer-events: none;
 }
 
+/* no card, no border -- controls float straight on the blurred backdrop,
+   each one its own soft "liquid glass" pill */
 .intro-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
-  padding: 48px 64px;
-  border-radius: 0;
-  border: 1.5px dashed var(--color-border-muted);
-  background: var(--color-surface);
+  gap: 28px;
 }
 
 .intro-title {
   font-family: var(--font-title);
   font-weight: 400;
-  font-size: 28px;
+  font-size: 26px;
   letter-spacing: 0.1em;
   color: var(--color-gold);
   text-transform: uppercase;
   margin: 0;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
 }
 
 .sound-toggle {
@@ -658,10 +657,24 @@ button {
   align-items: center;
   gap: 14px;
   cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
+  padding: 14px 26px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   outline: none;
+  transition: transform 150ms ease;
+}
+
+.sound-toggle:hover,
+.sound-toggle:focus-visible {
+  transform: scale(1.03);
+}
+
+.sound-toggle:active {
+  transform: scale(0.97);
 }
 
 .sound-toggle-label {
@@ -703,24 +716,22 @@ button {
   background: var(--color-accent);
 }
 
-.sound-toggle:focus-visible .sound-toggle-switch {
-  box-shadow: 0 0 0 3px rgba(255, 144, 18, 0.35);
-}
-
 .intro-enter {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #1a1200;
-  background: var(--color-accent);
+  color: var(--color-accent);
   padding: 14px 48px;
-  border-radius: 3px;
-  border: none;
+  border-radius: 999px;
+  background: rgba(255, 144, 18, 0.18);
+  border: 1px solid rgba(255, 144, 18, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   cursor: pointer;
   outline: none;
-  box-shadow: 0 0 24px 4px rgba(255, 144, 18, 0.4);
+  box-shadow: 0 8px 32px rgba(255, 144, 18, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   transition: transform 150ms ease;
 }
 
