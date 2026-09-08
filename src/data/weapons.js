@@ -87,4 +87,4 @@ export const categories = [
   },
 ];
 
-export const defaultSelection = { categoryId: "submachine-guns", slotIndex: 0 };
+export const defaultSelection = { categoryId: "submachine-guns", slotIndex: 1 };

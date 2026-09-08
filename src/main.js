@@ -248,7 +248,7 @@ function selectCategory(categoryId, explicitDirection) {
     1;
 
   state.categoryId = categoryId;
-  state.slotIndex = 0;
+  state.slotIndex = defaultSelection.slotIndex;
 
   renderTabs();
   renderCarousel();
