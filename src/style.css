@@ -57,7 +57,12 @@ button {
   height: calc(100dvh / 0.9);
   transform: scale(0.9);
   transform-origin: top left;
-  overflow: auto;
+  /* the main viewport's slide transition briefly hard-sets a pane to
+     translateX(100%) before animating it back to 0 -- that momentary
+     off-screen position still counts as scrollable overflow, so it's
+     never allowed sideways here; vertical stays the short-window fallback */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .screen {
