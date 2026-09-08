@@ -731,6 +731,13 @@ button {
     display: none;
   }
 
+  /* the footer prompts used to absorb the screen's own bottom padding;
+     with them gone the tabs are now the last row, so that padding just
+     lifts them off the true bottom edge */
+  .screen {
+    padding-bottom: 0;
+  }
+
   /* fills the screen with no scroll fallback on mobile -- the desktop
      short-window fallback (see .scale-wrapper) isn't needed here since
      dropping the carousel and footer prompts already frees up enough
