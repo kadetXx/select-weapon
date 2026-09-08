@@ -369,9 +369,9 @@ window.addEventListener("keydown", (event) => {
 
 // X/B are decorative prompts -- this UI has no actual select/back flow,
 // so clicking them plays a "can't do that" buzz instead of a real action
-for (const promptIcon of document.querySelectorAll(".prompt-icon")) {
-  promptIcon.addEventListener("pointerenter", playHover);
-  promptIcon.addEventListener("click", playDenied);
+for (const prompt of document.querySelectorAll(".prompt")) {
+  prompt.addEventListener("pointerenter", playHover);
+  prompt.addEventListener("click", playDenied);
 }
 
 // intro overlay: its Enter click is the guaranteed user gesture that

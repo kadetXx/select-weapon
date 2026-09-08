@@ -591,6 +591,8 @@ button {
   flex-direction: row;
   align-items: center;
   gap: 10px;
+  cursor: pointer;
+  outline: none;
 }
 
 .prompt-icon {
@@ -603,35 +605,33 @@ button {
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 12px;
-  cursor: pointer;
-  outline: none;
   transition: transform 150ms ease, box-shadow 150ms ease;
 }
 
-.prompt-icon:hover,
-.prompt-icon:focus-visible {
+.prompt:hover .prompt-icon,
+.prompt:focus-visible .prompt-icon {
   transform: scale(1.18);
 }
 
-.prompt-icon:active {
+.prompt:active .prompt-icon {
   transform: scale(0.88);
 }
 
-.prompt-icon.select {
+.prompt.select .prompt-icon {
   border: 1.5px solid var(--color-btn-blue);
   color: var(--color-btn-blue);
 }
 
-.prompt-icon.select:focus-visible {
+.prompt.select:focus-visible .prompt-icon {
   box-shadow: 0 0 0 3px rgba(92, 130, 224, 0.35);
 }
 
-.prompt-icon.back {
+.prompt.back .prompt-icon {
   border: 1.5px solid var(--color-btn-red);
   color: var(--color-btn-red);
 }
 
-.prompt-icon.back:focus-visible {
+.prompt.back:focus-visible .prompt-icon {
   box-shadow: 0 0 0 3px rgba(217, 70, 58, 0.35);
 }
 
