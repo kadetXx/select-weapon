@@ -197,22 +197,6 @@ button {
   transform: scale(0.92);
 }
 
-@keyframes pulse-feedback {
-  0% {
-    transform: scale(1);
-  }
-  40% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.pulse-feedback {
-  animation: pulse-feedback 260ms ease;
-}
-
 /* Main viewport */
 .viewport {
   position: relative;

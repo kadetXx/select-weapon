@@ -7,13 +7,22 @@ const SMG_MODEL = MODEL_BASE + "smg.glb";
 const LMG_MODEL = MODEL_BASE + "lmg.glb";
 const SHOTGUN_MODEL = MODEL_BASE + "shotgun.glb";
 const LAUNCHER_MODEL = MODEL_BASE + "launcher.glb";
-const SLOT_COUNT = 4;
 
-function repeatAcrossSlots(weapon, count = SLOT_COUNT) {
-  return Array.from({ length: count }, (_, i) => ({
-    ...weapon,
-    slotId: `${weapon.id}-slot-${i}`,
-  }));
+function slugify(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+// `entries` is every real weapon confirmed for this category (per the
+// reference screenshots in media/), in their on-screen order -- a bare name
+// string if only the name is confirmed so far, or { name, model } once its
+// own model is ready. Whichever one already has full data becomes `base`;
+// the rest borrow its stats as a placeholder until each gets its own.
+function buildSlots(base, entries) {
+  return entries.map((entry) => {
+    const { name, model } = typeof entry === "string" ? { name: entry } : entry;
+    const id = slugify(name);
+    return { ...base, id, name, slotId: id, model: model ?? base.model };
+  });
 }
 
 export const categories = [
@@ -28,7 +37,7 @@ export const categories = [
     label: "Submachine Guns",
     enabled: true,
     defaultSlotIndex: 1,
-    weapons: repeatAcrossSlots(
+    weapons: buildSlots(
       {
         id: "cordite",
         name: "Cordite",
@@ -39,7 +48,7 @@ export const categories = [
         operatorMod: "Belt Feed",
         model: SMG_MODEL,
       },
-      4
+      ["MX-9", "Spitfire", "Cordite", "GKS"]
     ),
   },
   {
@@ -47,7 +56,7 @@ export const categories = [
     label: "Light Machine",
     enabled: true,
     defaultSlotIndex: 0,
-    weapons: repeatAcrossSlots(
+    weapons: buildSlots(
       {
         id: "titan",
         name: "Titan",
@@ -58,14 +67,14 @@ export const categories = [
         operatorMod: "Oppressor",
         model: LMG_MODEL,
       },
-      3
+      ["Hades", "Titan", "VKM 750"]
     ),
   },
   {
     id: "launchers",
     label: "Launchers",
     enabled: true,
-    weapons: repeatAcrossSlots(
+    weapons: buildSlots(
       {
         id: "hellion-salvo",
         name: "Hellion Salvo",
@@ -76,14 +85,14 @@ export const categories = [
         operatorMod: "None",
         model: LAUNCHER_MODEL,
       },
-      1
+      ["Hellion Salvo"]
     ),
   },
   {
     id: "shotguns",
     label: "Shotguns",
     enabled: true,
-    weapons: repeatAcrossSlots(
+    weapons: buildSlots(
       {
         id: "mog12",
         name: "MOG 12",
@@ -94,7 +103,7 @@ export const categories = [
         operatorMod: "Dragon Breath",
         model: SHOTGUN_MODEL,
       },
-      2
+      ["MOG 12", "SG12"]
     ),
   },
   {

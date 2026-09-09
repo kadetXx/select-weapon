@@ -6,3 +6,4 @@ dist
 # planned standalone untextured-preview page, not committed. The compressed
 # versions actually used by the app live in public/models/.
 media/*-untextured.glb
+media/*-textured.glb

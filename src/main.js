@@ -20,12 +20,6 @@ const el = {
   carousel: document.getElementById("carousel"),
 };
 
-function pulse(target) {
-  target.classList.remove("pulse-feedback");
-  void target.offsetWidth; // restart the animation even if it's mid-run
-  target.classList.add("pulse-feedback");
-}
-
 function setActive(button, isActive) {
   button.classList.toggle("active", isActive);
   if (isActive) button.setAttribute("aria-current", "true");
@@ -280,20 +274,32 @@ function selectCategory(categoryId, explicitDirection) {
   transitionToSlot(direction);
 }
 
-function stepCategory(direction, source) {
+function stepCategory(direction) {
   const list = enabledCategories();
   const currentIndex = list.findIndex((c) => c.id === state.categoryId);
   const nextIndex = (currentIndex + direction + list.length) % list.length;
   selectCategory(list[nextIndex].id, direction);
-
-  // LB/RB and the on-screen arrows are the same action -- clicking either
-  // (or pressing the arrow keys) pulses whichever one wasn't the direct
-  // source, so it always reads as "the LB/RB pair just fired"
   playSelect();
-  const arrowBtn = direction === -1 ? el.prevCategory : el.nextCategory;
-  const badgeBtn = direction === -1 ? el.lbButton : el.rbButton;
-  if (source !== "arrow") pulse(arrowBtn);
-  if (source !== "badge") pulse(badgeBtn);
+}
+
+// LB/RB step through weapon slots in the current category rather than
+// switching category -- on portrait/mobile the carousel tiles are hidden
+// (see the portrait media query in style.css), so this is the only way to
+// browse a category's weapons there
+function stepSlot(direction) {
+  const category = getCategory(state.categoryId);
+  const count = category.weapons.length;
+  if (count === 0) return;
+  // nothing to switch to (e.g. Launchers' single weapon) -- same "can't do
+  // that" buzz as the decorative X/B prompts, so it reads as denied rather
+  // than silently doing nothing
+  if (count === 1) {
+    playDenied();
+    return;
+  }
+  const nextIndex = (state.slotIndex + direction + count) % count;
+  selectSlot(state.categoryId, nextIndex);
+  playSelect();
 }
 
 function buildTabButton(category) {
@@ -478,19 +484,26 @@ function renderCarousel() {
 }
 
 const categoryControls = [
-  { button: el.prevCategory, direction: -1, source: "arrow" },
-  { button: el.nextCategory, direction: 1, source: "arrow" },
-  { button: el.lbButton, direction: -1, source: "badge" },
-  { button: el.rbButton, direction: 1, source: "badge" },
+  { button: el.prevCategory, direction: -1 },
+  { button: el.nextCategory, direction: 1 },
 ];
-for (const { button, direction, source } of categoryControls) {
+for (const { button, direction } of categoryControls) {
   button.addEventListener("pointerenter", playHover);
-  button.addEventListener("click", () => stepCategory(direction, source));
+  button.addEventListener("click", () => stepCategory(direction));
+}
+
+const slotControls = [
+  { button: el.lbButton, direction: -1 },
+  { button: el.rbButton, direction: 1 },
+];
+for (const { button, direction } of slotControls) {
+  button.addEventListener("pointerenter", playHover);
+  button.addEventListener("click", () => stepSlot(direction));
 }
 
 window.addEventListener("keydown", (event) => {
-  if (event.key === "ArrowLeft") stepCategory(-1, "keyboard");
-  if (event.key === "ArrowRight") stepCategory(1, "keyboard");
+  if (event.key === "ArrowLeft") stepCategory(-1);
+  if (event.key === "ArrowRight") stepCategory(1);
 });
 
 // X/B are decorative prompts -- this UI has no actual select/back flow,
