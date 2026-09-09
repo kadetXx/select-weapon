@@ -64,6 +64,12 @@ function getSlot(categoryId, slotIndex) {
   return getCategory(categoryId)?.weapons[slotIndex];
 }
 
+// per-category starting slot when a category is switched into; falls back
+// to the first tile if the category doesn't specify one
+function initialSlotIndex(category) {
+  return category.defaultSlotIndex ?? 0;
+}
+
 function enabledCategories() {
   return categories.filter((c) => c.enabled && c.weapons.length > 0);
 }
@@ -267,7 +273,7 @@ function selectCategory(categoryId, explicitDirection) {
     1;
 
   state.categoryId = categoryId;
-  state.slotIndex = defaultSelection.slotIndex;
+  state.slotIndex = initialSlotIndex(category);
 
   renderTabs();
   renderCarousel();
