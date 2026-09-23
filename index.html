@@ -43,6 +43,15 @@
     <link rel="preload" href="/models/smg.glb" as="fetch" crossorigin />
 
     <link rel="stylesheet" href="/src/style.css" />
+
+    <!-- Brimble analytics. Deferred, so it is fetched while the document is
+         parsed and run after it, behind the model preload above -- nothing
+         here is allowed in front of first paint. -->
+    <script
+      defer
+      src="https://scripts.brimble.io/analytics/brimble.js"
+      data-website-id="a0d0bc39-be0b-4b27-a961-5b66f3fc314c"
+    ></script>
   </head>
   <body>
     <div class="intro-overlay" id="introOverlay">
